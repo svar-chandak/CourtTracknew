@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { playerSchema, type PlayerFormData } from '@/lib/validations'
+import { playerSchema, playerFormInputSchema, type PlayerFormData, type PlayerFormInputData } from '@/lib/validations'
 import { useTeamStore } from '@/stores/team-store'
 import {
   Dialog,
@@ -41,16 +41,21 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
     watch,
     reset,
     formState: { errors },
-  } = useForm<PlayerFormData>({
-    resolver: zodResolver(playerSchema),
+  } = useForm<PlayerFormInputData>({
+    resolver: zodResolver(playerFormInputSchema),
   })
 
   const positionPreference = watch('position_preference')
 
-  const onSubmit = async (data: PlayerFormData) => {
+  const onSubmit = async (data: PlayerFormInputData) => {
     setIsLoading(true)
     
     try {
+      // Transform UTR string to number
+      const utrRating = data.utr_rating && data.utr_rating.trim() !== '' 
+        ? parseFloat(data.utr_rating) 
+        : undefined;
+      
       const { error } = await addPlayer({
         team_id: teamId,
         name: data.name,
@@ -58,7 +63,7 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
         grade: data.grade,
         position_preference: data.position_preference || undefined,
         team_level: data.team_level || undefined,
-        utr_rating: data.utr_rating || undefined,
+        utr_rating: utrRating,
       })
       
       if (error) {
@@ -190,7 +195,7 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
               max="16"
               step="0.1"
               placeholder="e.g., 8.5"
-              {...register('utr_rating', { valueAsNumber: true })}
+              {...register('utr_rating')}
             />
             <p className="text-xs text-gray-500">
               Universal Tennis Rating (1-16 scale). Leave blank if unknown.

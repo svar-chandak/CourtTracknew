@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { playerSchema, type PlayerFormData } from '@/lib/validations'
+import { playerSchema, playerFormInputSchema, type PlayerFormData, type PlayerFormInputData } from '@/lib/validations'
 import { useTeamStore } from '@/stores/team-store'
 import {
   Dialog,
@@ -42,15 +42,15 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
     watch,
     reset,
     formState: { errors },
-  } = useForm<PlayerFormData>({
-    resolver: zodResolver(playerSchema),
+  } = useForm<PlayerFormInputData>({
+    resolver: zodResolver(playerFormInputSchema),
     defaultValues: {
       name: player.name,
       gender: player.gender,
       grade: player.grade,
       position_preference: player.position_preference as 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles' | undefined,
       team_level: player.team_level as 'varsity' | 'jv' | 'freshman' | undefined,
-      utr_rating: player.utr_rating,
+      utr_rating: player.utr_rating?.toString() || '',
     },
   })
 
@@ -64,21 +64,26 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
       grade: player.grade,
       position_preference: player.position_preference as 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles' | undefined,
       team_level: player.team_level as 'varsity' | 'jv' | 'freshman' | undefined,
-      utr_rating: player.utr_rating,
+      utr_rating: player.utr_rating?.toString() || '',
     })
   }, [player, reset])
 
-  const onSubmit = async (data: PlayerFormData) => {
+  const onSubmit = async (data: PlayerFormInputData) => {
     setIsLoading(true)
     
     try {
+      // Transform UTR string to number
+      const utrRating = data.utr_rating && data.utr_rating.trim() !== '' 
+        ? parseFloat(data.utr_rating) 
+        : undefined;
+        
       const { error } = await updatePlayer(player.id, {
         name: data.name,
         gender: data.gender,
         grade: data.grade,
         position_preference: data.position_preference || undefined,
         team_level: data.team_level || undefined,
-        utr_rating: data.utr_rating || undefined,
+        utr_rating: utrRating,
       })
       
       if (error) {
@@ -209,7 +214,7 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
               max="16"
               step="0.1"
               placeholder="e.g., 8.5"
-              {...register('utr_rating', { valueAsNumber: true })}
+              {...register('utr_rating')}
             />
             <p className="text-xs text-gray-500">
               Universal Tennis Rating (1-16 scale). Leave blank if unknown.
