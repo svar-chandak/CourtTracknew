@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { matchSchema, type MatchFormData } from '@/lib/validations'
 import { useTeamStore } from '@/stores/team-store'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
   const [isLoading, setIsLoading] = useState(false)
   const [selectedOpponentTeam, setSelectedOpponentTeam] = useState<Team | null>(null)
   const createMatch = useTeamStore((state) => state.createMatch)
+  const { coach } = useAuthStore()
 
   const {
     register,
@@ -64,6 +66,7 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
     // Debug logging
     console.log('Form submission data:', data)
     console.log('Selected opponent team:', selectedOpponentTeam)
+    console.log('Home team ID (teamId):', teamId)
     
     // Validate that a team is selected
     if (!selectedOpponentTeam) {
@@ -77,29 +80,52 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
       return
     }
 
+    // Validate that home_team_id is not empty
+    if (!teamId || !teamId.trim()) {
+      toast.error('Invalid home team configuration')
+      return
+    }
+
     // Validate that away_team_id is a valid UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(data.away_team_id)) {
-      toast.error('Invalid team selection. Please select a team again.')
+      toast.error('Invalid opponent team selection. Please select a team again.')
+      return
+    }
+
+    // Validate that home_team_id is a valid UUID format
+    if (!uuidRegex.test(teamId)) {
+      toast.error('Invalid home team configuration')
       return
     }
 
     setIsLoading(true)
     
     try {
-      const { error } = await createMatch({
+      // Validate that coach ID is available
+      if (!coach?.id) {
+        toast.error('Coach information not available')
+        return
+      }
+
+      // Prepare match data with proper validation
+      const matchData = {
         home_team_id: teamId,
         away_team_id: data.away_team_id,
         match_date: data.match_date,
-        match_time: data.match_time || undefined,
-        location: data.location || undefined,
+        match_time: data.match_time && data.match_time.trim() ? data.match_time : undefined,
+        location: data.location && data.location.trim() ? data.location : undefined,
         match_type: data.match_type,
-        notes: data.notes || undefined,
-        status: 'scheduled',
+        notes: data.notes && data.notes.trim() ? data.notes : undefined,
+        status: 'scheduled' as const,
         home_score: 0,
         away_score: 0,
-        created_by: '', // Will be set by the store
-      })
+        created_by: coach.id,
+      }
+
+      console.log('Final match data being sent:', matchData)
+
+      const { error } = await createMatch(matchData)
       
       if (error) {
         toast.error(error)
