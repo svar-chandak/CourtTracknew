@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { matchSchema, type MatchFormData } from '@/lib/validations'
 import { useTeamStore } from '@/stores/team-store'
-import { supabase } from '@/lib/supabase'
 import {
   Dialog,
   DialogContent,
@@ -17,14 +16,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { TeamSearch } from '@/components/teams/team-search'
 import type { Team } from '@/lib/types'
 
 interface ScheduleMatchDialogProps {
@@ -35,15 +29,13 @@ interface ScheduleMatchDialogProps {
 
 export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatchDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [availableTeams, setAvailableTeams] = useState<Team[]>([])
-  const [loadingTeams, setLoadingTeams] = useState(false)
+  const [selectedOpponentTeam, setSelectedOpponentTeam] = useState<Team | null>(null)
   const createMatch = useTeamStore((state) => state.createMatch)
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<MatchFormData>({
@@ -54,38 +46,19 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
     }
   })
 
-  const awayTeamId = watch('away_team_id')
+  // Handle team selection
+  const handleTeamSelect = (team: Team) => {
+    setSelectedOpponentTeam(team)
+    setValue('away_team_id', team.id)
+  }
 
-  // Load available teams (excluding current team)
+  // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      loadAvailableTeams()
+      reset()
+      setSelectedOpponentTeam(null)
     }
-  }, [open, teamId])
-
-  const loadAvailableTeams = async () => {
-    setLoadingTeams(true)
-    try {
-      const { data: teams, error } = await supabase
-        .from('teams')
-        .select('*')
-        .neq('id', teamId)
-        .order('school_name')
-
-      if (error) {
-        console.error('Error loading teams:', error)
-        toast.error('Failed to load teams')
-        return
-      }
-
-      setAvailableTeams(teams || [])
-    } catch (error) {
-      console.error('Error loading teams:', error)
-      toast.error('Failed to load teams')
-    } finally {
-      setLoadingTeams(false)
-    }
-  }
+  }, [open, reset])
 
   const onSubmit = async (data: MatchFormData) => {
     setIsLoading(true)
@@ -131,22 +104,38 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="away_team_id">Opponent Team *</Label>
-            <Select
-              value={awayTeamId || ''}
-              onValueChange={(value) => setValue('away_team_id', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={loadingTeams ? "Loading teams..." : "Select opponent team"} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTeams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.school_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Opponent Team *</Label>
+            {selectedOpponentTeam ? (
+              <div className="border rounded-lg p-3 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">{selectedOpponentTeam.school_name}</h4>
+                    <p className="text-sm text-gray-600">
+                      Team Code: #{selectedOpponentTeam.team_code}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedOpponentTeam(null)
+                      setValue('away_team_id', '')
+                    }}
+                  >
+                    Change
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="border rounded-lg p-4">
+                <TeamSearch
+                  onTeamSelect={handleTeamSelect}
+                  currentTeamId={teamId}
+                  placeholder="Search for opponent team by team code or school name..."
+                />
+              </div>
+            )}
             {errors.away_team_id && (
               <p className="text-sm text-red-600">{errors.away_team_id.message}</p>
             )}
@@ -210,7 +199,7 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || loadingTeams}>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Scheduling...' : 'Schedule Match'}
             </Button>
           </div>

@@ -11,6 +11,8 @@ interface TeamState {
   // Team actions
   getCurrentTeam: (coachId: string) => Promise<void>
   updateTeamRecord: (teamId: string, wins: number, losses: number) => Promise<void>
+  searchTeamsByCode: (teamCode: string) => Promise<{ teams: Team[], error: string | null }>
+  getAllTeams: () => Promise<{ teams: Team[], error: string | null }>
   
   // Player actions
   getPlayers: (teamId: string) => Promise<void>
@@ -86,6 +88,50 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error in updateTeamRecord:', error)
+    }
+  },
+
+  searchTeamsByCode: async (teamCode: string) => {
+    try {
+      const { data: teams, error } = await supabase
+        .from('teams')
+        .select(`
+          *,
+          coach:coaches(*)
+        `)
+        .ilike('team_code', `%${teamCode}%`)
+
+      if (error) {
+        console.error('Error searching teams:', error)
+        return { teams: [], error: error.message }
+      }
+
+      return { teams: teams || [], error: null }
+    } catch (error) {
+      console.error('Error searching teams:', error)
+      return { teams: [], error: 'An unexpected error occurred' }
+    }
+  },
+
+  getAllTeams: async () => {
+    try {
+      const { data: teams, error } = await supabase
+        .from('teams')
+        .select(`
+          *,
+          coach:coaches(*)
+        `)
+        .order('school_name')
+
+      if (error) {
+        console.error('Error fetching all teams:', error)
+        return { teams: [], error: error.message }
+      }
+
+      return { teams: teams || [], error: null }
+    } catch (error) {
+      console.error('Error fetching all teams:', error)
+      return { teams: [], error: 'An unexpected error occurred' }
     }
   },
 
