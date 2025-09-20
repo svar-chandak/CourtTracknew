@@ -20,13 +20,20 @@ export const profileUpdateSchema = z.object({
   phone: z.string().optional(),
 })
 
+// Team validations
+export const teamSchema = z.object({
+  team_level: z.enum(['varsity', 'jv', 'freshman']),
+  gender: z.enum(['boys', 'girls', 'mixed']),
+})
+
 // Player validations
 export const playerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
+  gender: z.enum(['male', 'female']),
   grade: z.number().min(9).max(12).optional(),
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
-  position_preference: z.enum(['1S', '2S', '3S', '4S', '5S', '6S', '1D', '2D', '3D']).optional(),
+  position_preference: z.enum(['boys_singles', 'girls_singles', 'boys_doubles', 'girls_doubles', 'mixed_doubles']).optional(),
   skill_level: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Varsity']).optional(),
 })
 
@@ -37,6 +44,7 @@ export const matchSchema = z.object({
   match_date: z.string().min(1, 'Match date is required'),
   match_time: z.string().optional(),
   location: z.string().optional(),
+  match_type: z.enum(['team_match', 'individual']),
   notes: z.string().optional(),
 }).refine((data) => data.home_team_id !== data.away_team_id, {
   message: 'Home and away teams must be different',

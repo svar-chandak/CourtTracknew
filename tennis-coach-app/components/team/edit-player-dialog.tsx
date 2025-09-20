@@ -46,10 +46,11 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
     resolver: zodResolver(playerSchema),
     defaultValues: {
       name: player.name,
+      gender: player.gender,
       grade: player.grade,
       email: player.email || '',
       phone: player.phone || '',
-      position_preference: player.position_preference as '1S' | '2S' | '3S' | '4S' | '5S' | '6S' | '1D' | '2D' | '3D' | undefined,
+      position_preference: player.position_preference as 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles' | undefined,
       skill_level: player.skill_level as 'Beginner' | 'Intermediate' | 'Advanced' | 'Varsity' | undefined,
     },
   })
@@ -61,10 +62,11 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
   useEffect(() => {
     reset({
       name: player.name,
+      gender: player.gender,
       grade: player.grade,
       email: player.email || '',
       phone: player.phone || '',
-      position_preference: player.position_preference as '1S' | '2S' | '3S' | '4S' | '5S' | '6S' | '1D' | '2D' | '3D' | undefined,
+      position_preference: player.position_preference as 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles' | undefined,
       skill_level: player.skill_level as 'Beginner' | 'Intermediate' | 'Advanced' | 'Varsity' | undefined,
     })
   }, [player, reset])
@@ -75,6 +77,7 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
     try {
       const { error } = await updatePlayer(player.id, {
         name: data.name,
+        gender: data.gender,
         grade: data.grade,
         email: data.email || undefined,
         phone: data.phone || undefined,
@@ -115,6 +118,25 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
             />
             {errors.name && (
               <p className="text-sm text-red-600">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender *</Label>
+            <Select
+              value={watch('gender') || ''}
+              onValueChange={(value) => setValue('gender', value as 'male' | 'female')}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.gender && (
+              <p className="text-sm text-red-600">{errors.gender.message}</p>
             )}
           </div>
 
@@ -169,21 +191,17 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
             <Label htmlFor="position_preference">Position Preference</Label>
             <Select
               value={positionPreference || ''}
-              onValueChange={(value) => setValue('position_preference', value as '1S' | '2S' | '3S' | '4S' | '5S' | '6S' | '1D' | '2D' | '3D')}
+              onValueChange={(value) => setValue('position_preference', value as 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select preferred position" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1S">1st Singles</SelectItem>
-                <SelectItem value="2S">2nd Singles</SelectItem>
-                <SelectItem value="3S">3rd Singles</SelectItem>
-                <SelectItem value="4S">4th Singles</SelectItem>
-                <SelectItem value="5S">5th Singles</SelectItem>
-                <SelectItem value="6S">6th Singles</SelectItem>
-                <SelectItem value="1D">1st Doubles</SelectItem>
-                <SelectItem value="2D">2nd Doubles</SelectItem>
-                <SelectItem value="3D">3rd Doubles</SelectItem>
+                <SelectItem value="boys_singles">Boys Singles</SelectItem>
+                <SelectItem value="girls_singles">Girls Singles</SelectItem>
+                <SelectItem value="boys_doubles">Boys Doubles</SelectItem>
+                <SelectItem value="girls_doubles">Girls Doubles</SelectItem>
+                <SelectItem value="mixed_doubles">Mixed Doubles</SelectItem>
               </SelectContent>
             </Select>
             {errors.position_preference && (

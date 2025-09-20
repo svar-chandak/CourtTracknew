@@ -48,6 +48,10 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
     formState: { errors },
   } = useForm<MatchFormData>({
     resolver: zodResolver(matchSchema),
+    defaultValues: {
+      home_team_id: teamId,
+      match_type: 'team_match',
+    }
   })
 
   const awayTeamId = watch('away_team_id')
@@ -93,6 +97,7 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
         match_date: data.match_date,
         match_time: data.match_time || undefined,
         location: data.location || undefined,
+        match_type: data.match_type,
         notes: data.notes || undefined,
         status: 'scheduled',
         home_score: 0,

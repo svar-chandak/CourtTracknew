@@ -14,6 +14,8 @@ export interface Team {
   team_code: string
   school_name: string
   coach_id: string
+  team_level: 'varsity' | 'jv' | 'freshman'
+  gender: 'boys' | 'girls' | 'mixed'
   season_record_wins: number
   season_record_losses: number
   created_at: string
@@ -24,6 +26,7 @@ export interface Player {
   id: string
   team_id: string
   name: string
+  gender: 'male' | 'female'
   grade?: number
   email?: string
   phone?: string
@@ -40,6 +43,7 @@ export interface Match {
   match_date: string
   match_time?: string
   location?: string
+  match_type: 'team_match' | 'individual'
   status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
   home_score: number
   away_score: number
@@ -49,6 +53,7 @@ export interface Match {
   home_team?: Team
   away_team?: Team
   created_by_coach?: Coach
+  divisions?: TeamMatchDivision[]
 }
 
 export interface Tournament {
@@ -98,7 +103,8 @@ export interface TournamentMatch {
 export interface MatchResult {
   id: string
   match_id: string
-  position: string // '1S', '2S', '3S', '4S', '5S', '6S', '1D', '2D', '3D'
+  division: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
+  position_number: number // 1st, 2nd, 3rd singles/doubles
   home_player_names: string[]
   away_player_names: string[]
   home_sets_won: number
@@ -112,10 +118,28 @@ export interface Lineup {
   id: string
   team_id: string
   match_id: string
-  position: string
+  division: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
+  position_number: number
   player_ids: string[]
   created_at: string
   players?: Player[]
+}
+
+export interface TeamMatchDivision {
+  id: string
+  match_id: string
+  division: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
+  position_number: number // 1st, 2nd, 3rd, etc.
+  home_player_ids: string[]
+  away_player_ids: string[]
+  home_sets_won: number
+  away_sets_won: number
+  winner?: 'home' | 'away'
+  score_details?: Record<string, unknown> // JSONB for set scores
+  completed: boolean
+  created_at: string
+  home_players?: Player[]
+  away_players?: Player[]
 }
 
 export interface ChallengeMatch {
@@ -138,3 +162,8 @@ export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled
 export type TournamentStatus = 'open' | 'full' | 'in_progress' | 'completed'
 export type TournamentType = 'single_elimination' | 'round_robin' | 'dual_match'
 export type TournamentMatchStatus = 'pending' | 'in_progress' | 'completed'
+export type TeamLevel = 'varsity' | 'jv' | 'freshman'
+export type Gender = 'male' | 'female'
+export type TeamGender = 'boys' | 'girls' | 'mixed'
+export type Division = 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
+export type MatchType = 'team_match' | 'individual'
