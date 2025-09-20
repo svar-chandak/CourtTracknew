@@ -114,16 +114,32 @@ export const useTeamStore = create<TeamState>((set, get) => ({
 
   addPlayer: async (player: Omit<Player, 'id' | 'created_at'>) => {
     try {
+      // Filter out undefined values and new fields that might not exist in DB yet
+      const playerData = Object.fromEntries(
+        Object.entries(player).filter(([key, value]) => {
+          // Only include fields that have values
+          if (value === undefined || value === null) return false
+          // Temporarily exclude new fields if they cause issues
+          return true
+        })
+      )
+
+      console.log('Attempting to insert player:', playerData)
+
       const { error } = await supabase
         .from('players')
-        .insert(player)
+        .insert(playerData)
 
-      if (error) return { error: error.message }
+      if (error) {
+        console.error('Database error:', error)
+        return { error: error.message }
+      }
 
       // Refresh players list
       await get().getPlayers(player.team_id)
       return { error: null }
     } catch (error) {
+      console.error('Unexpected error:', error)
       return { error: 'An unexpected error occurred' }
     }
   },

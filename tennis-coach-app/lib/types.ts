@@ -30,7 +30,7 @@ export interface Player {
   grade?: number
   position_preference?: string
   team_level?: 'varsity' | 'jv' | 'freshman'
-  utr_rating?: number | string
+  utr_rating?: number
   created_at: string
   team?: Team
 }
