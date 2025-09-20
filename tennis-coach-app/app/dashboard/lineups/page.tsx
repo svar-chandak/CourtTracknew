@@ -12,7 +12,7 @@ import { CreateLineupDialog } from '@/components/lineups/create-lineup-dialog'
 export default function LineupsPage() {
   const { coach } = useAuthStore()
   const { currentTeam, players, loading, getCurrentTeam, getPlayers } = useTeamStore()
-  const [selectedMatch, setSelectedMatch] = useState<string | null>(null)
+  const [selectedTeamLevel, setSelectedTeamLevel] = useState<'varsity' | 'jv' | 'freshman' | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   useEffect(() => {
@@ -27,25 +27,38 @@ export default function LineupsPage() {
     }
   }, [currentTeam, getPlayers])
 
-  const positions = [
-    { id: '1S', name: '1st Singles', type: 'singles' },
-    { id: '2S', name: '2nd Singles', type: 'singles' },
-    { id: '3S', name: '3rd Singles', type: 'singles' },
-    { id: '4S', name: '4th Singles', type: 'singles' },
-    { id: '5S', name: '5th Singles', type: 'singles' },
-    { id: '6S', name: '6th Singles', type: 'singles' },
-    { id: '1D', name: '1st Doubles', type: 'doubles' },
-    { id: '2D', name: '2nd Doubles', type: 'doubles' },
-    { id: '3D', name: '3rd Doubles', type: 'doubles' },
-  ]
+  // Auto-select team level if only one has players
+  useEffect(() => {
+    if (players.length > 0 && !selectedTeamLevel) {
+      const varsityPlayers = players.filter(p => p.team_level === 'varsity')
+      const jvPlayers = players.filter(p => p.team_level === 'jv')
+      const freshmanPlayers = players.filter(p => p.team_level === 'freshman')
+      
+      if (varsityPlayers.length > 0) setSelectedTeamLevel('varsity')
+      else if (jvPlayers.length > 0) setSelectedTeamLevel('jv')
+      else if (freshmanPlayers.length > 0) setSelectedTeamLevel('freshman')
+    }
+  }, [players, selectedTeamLevel])
+
+  const getTeamLevelStats = () => {
+    const varsityPlayers = players.filter(p => p.team_level === 'varsity')
+    const jvPlayers = players.filter(p => p.team_level === 'jv')
+    const freshmanPlayers = players.filter(p => p.team_level === 'freshman')
+    
+    return {
+      varsity: varsityPlayers.length,
+      jv: jvPlayers.length,
+      freshman: freshmanPlayers.length,
+      total: players.length
+    }
+  }
+
+  const stats = getTeamLevelStats()
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading lineups...</p>
-        </div>
+        <div className="text-gray-500">Loading lineups...</div>
       </div>
     )
   }
@@ -55,10 +68,8 @@ export default function LineupsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lineups</h1>
-          <p className="text-gray-600 mt-1">
-            Create and manage match lineups for your team
-          </p>
+          <h1 className="text-3xl font-bold">Lineups</h1>
+          <p className="text-gray-600">Create and manage match lineups for your team</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -66,7 +77,7 @@ export default function LineupsPage() {
         </Button>
       </div>
 
-      {/* Lineup Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -74,150 +85,233 @@ export default function LineupsPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{players.length}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Players</CardTitle>
-            <Gamepad2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Varsity Players</CardTitle>
+            <Trophy className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{players.length}</div>
+            <div className="text-2xl font-bold text-green-600">{stats.varsity}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Lineups</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">JV Players</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold text-blue-600">{stats.jv}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lineup Templates</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Freshman Players</CardTitle>
+            <Users className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold text-yellow-600">{stats.freshman}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Lineup Builder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lineup Builder</CardTitle>
-          <CardDescription>
-            Drag and drop players to create your match lineup
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {players.length === 0 ? (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No players available</h3>
-              <p className="text-gray-600 mb-4">Add players to your team first to create lineups</p>
-              <Button onClick={() => window.location.href = '/dashboard/team'}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Players
-              </Button>
+      {/* Team Level Selection */}
+      {players.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Team Level</CardTitle>
+            <CardDescription>Choose which team level to create lineups for</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex space-x-4">
+              {(['varsity', 'jv', 'freshman'] as const).map((level) => {
+                const levelPlayers = players.filter(p => p.team_level === level)
+                const levelName = level === 'varsity' ? 'Varsity' : level === 'jv' ? 'Junior Varsity' : 'Freshman'
+                
+                return (
+                  <Button
+                    key={level}
+                    variant={selectedTeamLevel === level ? 'default' : 'outline'}
+                    onClick={() => setSelectedTeamLevel(level)}
+                    className="flex items-center gap-2"
+                    disabled={levelPlayers.length === 0}
+                  >
+                    <Users className="h-4 w-4" />
+                    {levelName} ({levelPlayers.length})
+                  </Button>
+                )
+              })}
             </div>
-          ) : (
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lineup Builder */}
+      {selectedTeamLevel && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gamepad2 className="h-5 w-5" />
+              {selectedTeamLevel === 'varsity' ? 'Varsity' : selectedTeamLevel === 'jv' ? 'Junior Varsity' : 'Freshman'} Lineup Builder
+            </CardTitle>
+            <CardDescription>
+              Create lineups for {selectedTeamLevel === 'varsity' ? 'Varsity' : selectedTeamLevel === 'jv' ? 'JV' : 'Freshman'} team matches
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-6">
-              {/* Available Players */}
+              {/* Available Players for Selected Level */}
               <div>
-                <h3 className="text-lg font-medium mb-3">Available Players</h3>
+                <h3 className="text-lg font-medium mb-3">
+                  Available {selectedTeamLevel === 'varsity' ? 'Varsity' : selectedTeamLevel === 'jv' ? 'JV' : 'Freshman'} Players
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {players.map((player) => (
-                    <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow cursor-move">
-                      <div className="text-sm font-medium">{player.name}</div>
-                      <div className="text-xs text-gray-600">
-                        {player.grade && `Grade ${player.grade}`}
-                        {player.team_level && ` • ${player.team_level === 'varsity' ? 'Varsity' : player.team_level === 'jv' ? 'JV' : 'Freshman'}`}
-                        {player.utr_rating && ` • UTR ${player.utr_rating}`}
+                  {players
+                    .filter(player => player.team_level === selectedTeamLevel)
+                    .map((player) => (
+                      <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow cursor-move">
+                        <div className="text-sm font-medium">{player.name}</div>
+                        <div className="text-xs text-gray-600">
+                          {player.grade && `Grade ${player.grade}`}
+                          {player.gender && ` • ${player.gender === 'male' ? 'Boys' : 'Girls'}`}
+                          {player.utr_rating && ` • UTR ${player.utr_rating}`}
+                        </div>
+                        {player.position_preference && (
+                          <Badge variant="outline" className="text-xs mt-1">
+                            {player.position_preference.replace('_', ' ')}
+                          </Badge>
+                        )}
                       </div>
-                      {player.position_preference && (
-                        <Badge variant="outline" className="text-xs mt-1">
-                          {player.position_preference}
-                        </Badge>
-                      )}
+                    ))}
+                  {players.filter(player => player.team_level === selectedTeamLevel).length === 0 && (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      <p>No {selectedTeamLevel} players available</p>
+                      <p className="text-sm">Add players to your team first</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
-              {/* Lineup Positions */}
+              {/* High School Tennis Lineup Positions */}
               <div>
-                <h3 className="text-lg font-medium mb-3">Lineup Positions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Singles */}
-                  <div>
-                    <h4 className="font-medium mb-2">Singles</h4>
-                    <div className="space-y-2">
-                      {positions.filter(p => p.type === 'singles').map((position) => (
-                        <div key={position.id} className="border-2 border-dashed border-gray-300 rounded-lg p-3 min-h-[60px] flex items-center">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{position.name}</div>
-                            <div className="text-xs text-gray-500">Drag player here</div>
+                <h3 className="text-lg font-medium mb-3">High School Tennis Lineup Positions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Boys Division */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-blue-700">Boys Division</h4>
+                    
+                    {/* Boys Singles */}
+                    <div>
+                      <h5 className="font-medium mb-2 text-sm">Boys Singles</h5>
+                      <div className="space-y-2">
+                        {[1, 2, 3].map((num) => (
+                          <div key={`boys_singles_${num}`} className="border-2 border-dashed border-blue-200 rounded-lg p-3 min-h-[60px] flex items-center bg-blue-50">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{num}st Boys Singles</div>
+                              <div className="text-xs text-gray-500">Drag player here</div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Boys Doubles */}
+                    <div>
+                      <h5 className="font-medium mb-2 text-sm">Boys Doubles</h5>
+                      <div className="space-y-2">
+                        {[1, 2].map((num) => (
+                          <div key={`boys_doubles_${num}`} className="border-2 border-dashed border-blue-200 rounded-lg p-3 min-h-[60px] flex items-center bg-blue-50">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{num}st Boys Doubles</div>
+                              <div className="text-xs text-gray-500">Drag 2 players here</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Doubles */}
-                  <div>
-                    <h4 className="font-medium mb-2">Doubles</h4>
-                    <div className="space-y-2">
-                      {positions.filter(p => p.type === 'doubles').map((position) => (
-                        <div key={position.id} className="border-2 border-dashed border-gray-300 rounded-lg p-3 min-h-[60px] flex items-center">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">{position.name}</div>
-                            <div className="text-xs text-gray-500">Drag 2 players here</div>
+                  {/* Girls Division */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-pink-700">Girls Division</h4>
+                    
+                    {/* Girls Singles */}
+                    <div>
+                      <h5 className="font-medium mb-2 text-sm">Girls Singles</h5>
+                      <div className="space-y-2">
+                        {[1, 2, 3].map((num) => (
+                          <div key={`girls_singles_${num}`} className="border-2 border-dashed border-pink-200 rounded-lg p-3 min-h-[60px] flex items-center bg-pink-50">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{num}st Girls Singles</div>
+                              <div className="text-xs text-gray-500">Drag player here</div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Girls Doubles */}
+                    <div>
+                      <h5 className="font-medium mb-2 text-sm">Girls Doubles</h5>
+                      <div className="space-y-2">
+                        {[1, 2].map((num) => (
+                          <div key={`girls_doubles_${num}`} className="border-2 border-dashed border-pink-200 rounded-lg p-3 min-h-[60px] flex items-center bg-pink-50">
+                            <div className="flex-1">
+                              <div className="text-sm font-medium">{num}st Girls Doubles</div>
+                              <div className="text-xs text-gray-500">Drag 2 players here</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mixed Doubles */}
+                <div className="mt-6">
+                  <h4 className="font-medium text-purple-700 mb-2">Mixed Doubles</h4>
+                  <div className="border-2 border-dashed border-purple-200 rounded-lg p-3 min-h-[60px] flex items-center bg-purple-50">
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">Mixed Doubles</div>
+                      <div className="text-xs text-gray-500">Drag 1 boy + 1 girl here</div>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 pt-4">
                 <Button variant="outline">
                   Save as Template
                 </Button>
-                <Button onClick={() => setShowCreateDialog(true)}>
+                <Button>
                   Create Lineup
                 </Button>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Recent Lineups */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Lineups</CardTitle>
-          <CardDescription>
-            Your recent match lineups and templates
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Gamepad2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No lineups yet</h3>
-            <p className="text-gray-600">Create your first lineup to get started</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* No Players Message */}
+      {players.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No players available</h3>
+            <p className="text-gray-600 mb-4">Add players to your team first to create lineups</p>
+            <Button onClick={() => window.location.href = '/dashboard/team'}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Players
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Create Lineup Dialog */}
       <CreateLineupDialog

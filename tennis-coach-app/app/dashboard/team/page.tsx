@@ -292,6 +292,140 @@ export default function TeamPage() {
                 )
               })}
               
+              {/* Show players without team levels */}
+              {players.filter(p => !p.team_level).length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-gray-100 text-gray-700">
+                      Unassigned
+                    </Badge>
+                    <span className="text-sm text-gray-600">
+                      {players.filter(p => !p.team_level).length} player{players.filter(p => !p.team_level).length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {/* Unassigned Boys */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-blue-700 flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Unassigned Boys ({players.filter(p => !p.team_level && p.gender === 'male').length})
+                      </h4>
+                      <div className="space-y-2">
+                        {players.filter(p => !p.team_level && p.gender === 'male').map((player) => (
+                          <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow bg-blue-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h5 className="font-medium">{player.name}</h5>
+                                {player.position_preference && (
+                                  <p className="text-xs text-gray-600">
+                                    Prefers: {player.position_preference.replace('_', ' ')}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingPlayer(player)}
+                                >
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeletePlayer(player.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {player.grade && (
+                                <Badge className={`${getGradeColor(player.grade)} text-xs`}>
+                                  Grade {player.grade}
+                                </Badge>
+                              )}
+                              {player.utr_rating && (
+                                <Badge variant="outline" className="text-xs">
+                                  UTR {player.utr_rating}
+                                </Badge>
+                              )}
+                              <Badge variant="destructive" className="text-xs">
+                                No Team Level
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                        {players.filter(p => !p.team_level && p.gender === 'male').length === 0 && (
+                          <p className="text-sm text-gray-500 italic text-center py-4">No unassigned boys players</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Unassigned Girls */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-pink-700 flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Unassigned Girls ({players.filter(p => !p.team_level && p.gender === 'female').length})
+                      </h4>
+                      <div className="space-y-2">
+                        {players.filter(p => !p.team_level && p.gender === 'female').map((player) => (
+                          <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow bg-pink-50">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h5 className="font-medium">{player.name}</h5>
+                                {player.position_preference && (
+                                  <p className="text-xs text-gray-600">
+                                    Prefers: {player.position_preference.replace('_', ' ')}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingPlayer(player)}
+                                >
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeletePlayer(player.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {player.grade && (
+                                <Badge className={`${getGradeColor(player.grade)} text-xs`}>
+                                  Grade {player.grade}
+                                </Badge>
+                              )}
+                              {player.utr_rating && (
+                                <Badge variant="outline" className="text-xs">
+                                  UTR {player.utr_rating}
+                                </Badge>
+                              )}
+                              <Badge variant="destructive" className="text-xs">
+                                No Team Level
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                        {players.filter(p => !p.team_level && p.gender === 'female').length === 0 && (
+                          <p className="text-sm text-gray-500 italic text-center py-4">No unassigned girls players</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Show message if no players have team levels assigned */}
               {players.length > 0 && players.every(p => !p.team_level) && (
                 <div className="text-center py-8 text-gray-500">
