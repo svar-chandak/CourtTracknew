@@ -13,17 +13,13 @@ import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
 
 export default function TeamPage() {
-  const { coach, getCurrentCoach } = useAuthStore()
+  const { coach } = useAuthStore()
   const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer } = useTeamStore()
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
   useEffect(() => {
-    getCurrentCoach()
-  }, [getCurrentCoach])
-
-  useEffect(() => {
-    if (coach) {
+    if (coach?.id) {
       getCurrentTeam(coach.id)
     }
   }, [coach, getCurrentTeam])

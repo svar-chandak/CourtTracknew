@@ -16,7 +16,7 @@ export default function LineupsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   useEffect(() => {
-    if (coach) {
+    if (coach?.id) {
       getCurrentTeam(coach.id)
     }
   }, [coach, getCurrentTeam])

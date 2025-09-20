@@ -16,7 +16,7 @@ export default function MatchesPage() {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
 
   useEffect(() => {
-    if (coach) {
+    if (coach?.id) {
       getCurrentTeam(coach.id)
     }
   }, [coach, getCurrentTeam])
