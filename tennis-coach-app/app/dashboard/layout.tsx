@@ -14,14 +14,11 @@ export default function DashboardLayout({
   const { coach, loading, getCurrentCoach } = useAuthStore()
 
   useEffect(() => {
-    console.log('Dashboard layout: getting current coach')
     getCurrentCoach()
   }, [getCurrentCoach])
 
   useEffect(() => {
-    console.log('Dashboard layout: checking auth state', { coach, loading })
     if (!loading && !coach?.id) {
-      console.log('Dashboard layout: redirecting to login')
       router.push('/login')
     }
   }, [coach, loading, router])

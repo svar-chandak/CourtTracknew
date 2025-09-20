@@ -15,9 +15,7 @@ export default function DashboardPage() {
   const { tournaments, loading: tournamentLoading, getTournaments } = useTournamentStore()
 
   useEffect(() => {
-    console.log('Dashboard page: coach changed', coach)
     if (coach && coach.id) {
-      console.log('Dashboard page: getting team and matches for coach', coach.id)
       getCurrentTeam(coach.id)
       getMatches(coach.id)
     }
