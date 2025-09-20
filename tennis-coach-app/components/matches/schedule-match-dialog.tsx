@@ -61,15 +61,26 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
   }, [open, reset])
 
   const onSubmit = async (data: MatchFormData) => {
+    // Debug logging
+    console.log('Form submission data:', data)
+    console.log('Selected opponent team:', selectedOpponentTeam)
+    
     // Validate that a team is selected
-    if (!selectedOpponentTeam || !data.away_team_id) {
+    if (!selectedOpponentTeam) {
       toast.error('Please select an opponent team')
       return
     }
 
     // Validate that away_team_id is not empty
-    if (!data.away_team_id.trim()) {
+    if (!data.away_team_id || !data.away_team_id.trim()) {
       toast.error('Please select an opponent team')
+      return
+    }
+
+    // Validate that away_team_id is a valid UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(data.away_team_id)) {
+      toast.error('Invalid team selection. Please select a team again.')
       return
     }
 
