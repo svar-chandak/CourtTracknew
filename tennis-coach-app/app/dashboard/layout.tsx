@@ -1,21 +1,27 @@
-import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@/lib/supabase-server'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/auth-store'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createServerComponentClient()
-  
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const router = useRouter()
+  const { coach, loading, getCurrentCoach } = useAuthStore()
 
-  if (!user) {
-    redirect('/login')
-  }
+  useEffect(() => {
+    getCurrentCoach()
+  }, [getCurrentCoach])
+
+  useEffect(() => {
+    if (!loading && !coach) {
+      router.push('/login')
+    }
+  }, [coach, loading, router])
 
   return (
     <div className="min-h-screen bg-gray-50">
