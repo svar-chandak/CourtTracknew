@@ -61,6 +61,18 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
   }, [open, reset])
 
   const onSubmit = async (data: MatchFormData) => {
+    // Validate that a team is selected
+    if (!selectedOpponentTeam || !data.away_team_id) {
+      toast.error('Please select an opponent team')
+      return
+    }
+
+    // Validate that away_team_id is not empty
+    if (!data.away_team_id.trim()) {
+      toast.error('Please select an opponent team')
+      return
+    }
+
     setIsLoading(true)
     
     try {
@@ -139,6 +151,8 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
             {errors.away_team_id && (
               <p className="text-sm text-red-600">{errors.away_team_id.message}</p>
             )}
+            {/* Hidden input to ensure away_team_id is properly set */}
+            <input type="hidden" {...register('away_team_id')} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -199,7 +213,10 @@ export function ScheduleMatchDialog({ teamId, open, onOpenChange }: ScheduleMatc
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading || !selectedOpponentTeam}
+            >
               {isLoading ? 'Scheduling...' : 'Schedule Match'}
             </Button>
           </div>
