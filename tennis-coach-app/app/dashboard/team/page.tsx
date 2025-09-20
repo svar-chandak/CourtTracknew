@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AddPlayerDialog } from '@/components/team/add-player-dialog'
 import { EditPlayerDialog } from '@/components/team/edit-player-dialog'
+import { MassAddPlayersDialog } from '@/components/team/mass-add-players-dialog'
 import { Users, Plus, Edit, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
@@ -16,6 +17,7 @@ export default function TeamPage() {
   const { coach } = useAuthStore()
   const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer } = useTeamStore()
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showMassAddDialog, setShowMassAddDialog] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
   useEffect(() => {
@@ -138,10 +140,16 @@ export default function TeamPage() {
               Manage your team players and their information
             </CardDescription>
           </div>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Player
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Player
+            </Button>
+            <Button onClick={() => setShowMassAddDialog(true)} variant="outline">
+              <Users className="h-4 w-4 mr-2" />
+              Mass Add
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {players.length === 0 ? (
@@ -444,6 +452,14 @@ export default function TeamPage() {
           teamId={currentTeam?.id || ''}
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
+        />
+      )}
+
+      {showMassAddDialog && currentTeam && (
+        <MassAddPlayersDialog
+          teamId={currentTeam.id}
+          open={showMassAddDialog}
+          onOpenChange={setShowMassAddDialog}
         />
       )}
 
