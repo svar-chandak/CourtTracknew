@@ -20,13 +20,13 @@ export default function DashboardLayout({
 
   useEffect(() => {
     console.log('Dashboard layout: checking auth state', { coach, loading })
-    if (!loading && !coach) {
+    if (!loading && !coach?.id) {
       console.log('Dashboard layout: redirecting to login')
       router.push('/login')
     }
   }, [coach, loading, router])
 
-  if (loading) {
+  if (loading || !coach?.id) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -35,10 +35,6 @@ export default function DashboardLayout({
         </div>
       </div>
     )
-  }
-
-  if (!coach) {
-    return null
   }
 
   return (
