@@ -34,7 +34,8 @@ export const playerSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(),
   position_preference: z.enum(['boys_singles', 'girls_singles', 'boys_doubles', 'girls_doubles', 'mixed_doubles']).optional(),
-  skill_level: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Varsity']).optional(),
+  team_level: z.enum(['varsity', 'jv', 'freshman']).optional(),
+  utr_rating: z.number().min(1).max(16).optional(),
 })
 
 // Match validations

@@ -139,7 +139,8 @@ export default function LineupsPage() {
                       <div className="text-sm font-medium">{player.name}</div>
                       <div className="text-xs text-gray-600">
                         {player.grade && `Grade ${player.grade}`}
-                        {player.skill_level && ` • ${player.skill_level}`}
+                        {player.team_level && ` • ${player.team_level === 'varsity' ? 'Varsity' : player.team_level === 'jv' ? 'JV' : 'Freshman'}`}
+                        {player.utr_rating && ` • UTR ${player.utr_rating}`}
                       </div>
                       {player.position_preference && (
                         <Badge variant="outline" className="text-xs mt-1">

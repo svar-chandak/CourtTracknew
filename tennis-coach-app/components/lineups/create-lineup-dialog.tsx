@@ -140,7 +140,8 @@ export function CreateLineupDialog({ players, open, onOpenChange }: CreateLineup
                           <div className="font-medium text-sm">{player.name}</div>
                           <div className="text-xs opacity-70">
                             {player.grade && `Grade ${player.grade}`}
-                            {player.skill_level && ` • ${player.skill_level}`}
+                            {player.team_level && ` • ${player.team_level === 'varsity' ? 'Varsity' : player.team_level === 'jv' ? 'JV' : 'Freshman'}`}
+                            {player.utr_rating && ` • UTR ${player.utr_rating}`}
                           </div>
                         </div>
                       </Button>

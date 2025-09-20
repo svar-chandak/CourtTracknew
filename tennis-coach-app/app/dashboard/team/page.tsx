@@ -41,12 +41,11 @@ export default function TeamPage() {
     }
   }
 
-  const getSkillLevelColor = (skillLevel?: string) => {
-    switch (skillLevel) {
-      case 'Varsity': return 'bg-green-100 text-green-800'
-      case 'Advanced': return 'bg-blue-100 text-blue-800'
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800'
-      case 'Beginner': return 'bg-gray-100 text-gray-800'
+  const getTeamLevelColor = (teamLevel?: string) => {
+    switch (teamLevel) {
+      case 'varsity': return 'bg-green-100 text-green-800'
+      case 'jv': return 'bg-blue-100 text-blue-800'
+      case 'freshman': return 'bg-yellow-100 text-yellow-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -100,7 +99,7 @@ export default function TeamPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {players.filter(p => p.skill_level === 'Varsity').length}
+              {players.filter(p => p.team_level === 'varsity').length}
             </div>
           </CardContent>
         </Card>
@@ -182,9 +181,16 @@ export default function TeamPage() {
                       </Badge>
                     )}
                     
-                    {player.skill_level && (
-                      <Badge className={getSkillLevelColor(player.skill_level)}>
-                        {player.skill_level}
+                    {player.team_level && (
+                      <Badge className={getTeamLevelColor(player.team_level)}>
+                        {player.team_level === 'varsity' ? 'Varsity' : 
+                         player.team_level === 'jv' ? 'JV' : 'Freshman'}
+                      </Badge>
+                    )}
+                    
+                    {player.utr_rating && (
+                      <Badge variant="outline" className="text-xs">
+                        UTR {player.utr_rating}
                       </Badge>
                     )}
 

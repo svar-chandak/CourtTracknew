@@ -31,7 +31,8 @@ export interface Player {
   email?: string
   phone?: string
   position_preference?: string
-  skill_level?: string
+  team_level?: 'varsity' | 'jv' | 'freshman'
+  utr_rating?: number
   created_at: string
   team?: Team
 }

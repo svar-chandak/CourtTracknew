@@ -46,7 +46,6 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
   })
 
   const positionPreference = watch('position_preference')
-  const skillLevel = watch('skill_level')
 
   const onSubmit = async (data: PlayerFormData) => {
     setIsLoading(true)
@@ -60,7 +59,8 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
         email: data.email || undefined,
         phone: data.phone || undefined,
         position_preference: data.position_preference || undefined,
-        skill_level: data.skill_level || undefined,
+        team_level: data.team_level || undefined,
+        utr_rating: data.utr_rating || undefined,
       })
       
       if (error) {
@@ -189,23 +189,41 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="skill_level">Skill Level</Label>
+            <Label htmlFor="team_level">Team Level</Label>
             <Select
-              value={skillLevel || ''}
-              onValueChange={(value) => setValue('skill_level', value as 'Beginner' | 'Intermediate' | 'Advanced' | 'Varsity')}
+              value={watch('team_level') || ''}
+              onValueChange={(value) => setValue('team_level', value as 'varsity' | 'jv' | 'freshman')}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select skill level" />
+                <SelectValue placeholder="Select team level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
-                <SelectItem value="Varsity">Varsity</SelectItem>
+                <SelectItem value="varsity">Varsity</SelectItem>
+                <SelectItem value="jv">Junior Varsity</SelectItem>
+                <SelectItem value="freshman">Freshman</SelectItem>
               </SelectContent>
             </Select>
-            {errors.skill_level && (
-              <p className="text-sm text-red-600">{errors.skill_level.message}</p>
+            {errors.team_level && (
+              <p className="text-sm text-red-600">{errors.team_level.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="utr_rating">UTR Rating (Optional)</Label>
+            <Input
+              id="utr_rating"
+              type="number"
+              min="1"
+              max="16"
+              step="0.1"
+              placeholder="e.g., 8.5"
+              {...register('utr_rating', { valueAsNumber: true })}
+            />
+            <p className="text-xs text-gray-500">
+              Universal Tennis Rating (1-16 scale). Leave blank if unknown.
+            </p>
+            {errors.utr_rating && (
+              <p className="text-sm text-red-600">{errors.utr_rating.message}</p>
             )}
           </div>
 
