@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Plus, MapPin, Clock, Users, Trophy } from 'lucide-react'
+import { ScheduleMatchDialog } from '@/components/matches/schedule-match-dialog'
 import Link from 'next/link'
 
 export default function MatchesPage() {
   const { coach } = useAuthStore()
   const { currentTeam, matches, loading, getCurrentTeam, getMatches } = useTeamStore()
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
 
   useEffect(() => {
     if (coach) {
@@ -64,7 +66,7 @@ export default function MatchesPage() {
             Schedule and manage your team&apos;s matches
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setShowScheduleDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Schedule Match
         </Button>
@@ -131,7 +133,7 @@ export default function MatchesPage() {
               <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming matches</h3>
               <p className="text-gray-600 mb-4">Schedule your first match to get started</p>
-              <Button>
+              <Button onClick={() => setShowScheduleDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Schedule Match
               </Button>
@@ -255,6 +257,15 @@ export default function MatchesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Schedule Match Dialog */}
+      {currentTeam && (
+        <ScheduleMatchDialog
+          teamId={currentTeam.id}
+          open={showScheduleDialog}
+          onOpenChange={setShowScheduleDialog}
+        />
+      )}
     </div>
   )
 }

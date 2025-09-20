@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Gamepad2, Plus, Users, Calendar, Trophy } from 'lucide-react'
+import { CreateLineupDialog } from '@/components/lineups/create-lineup-dialog'
 
 export default function LineupsPage() {
   const { coach } = useAuthStore()
   const { currentTeam, players, loading, getCurrentTeam, getPlayers } = useTeamStore()
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   useEffect(() => {
     if (coach) {
@@ -58,7 +60,7 @@ export default function LineupsPage() {
             Create and manage match lineups for your team
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Create Lineup
         </Button>
@@ -121,7 +123,7 @@ export default function LineupsPage() {
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No players available</h3>
               <p className="text-gray-600 mb-4">Add players to your team first to create lineups</p>
-              <Button>
+              <Button onClick={() => window.location.href = '/dashboard/team'}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Players
               </Button>
@@ -190,7 +192,7 @@ export default function LineupsPage() {
                 <Button variant="outline">
                   Save as Template
                 </Button>
-                <Button>
+                <Button onClick={() => setShowCreateDialog(true)}>
                   Create Lineup
                 </Button>
               </div>
@@ -215,6 +217,13 @@ export default function LineupsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Lineup Dialog */}
+      <CreateLineupDialog
+        players={players}
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
     </div>
   )
 }
