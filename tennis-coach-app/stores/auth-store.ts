@@ -90,10 +90,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   getCurrentCoach: async () => {
     try {
       set({ loading: true })
+      console.log('Getting current coach...')
       
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('Current user:', user)
       
       if (!user) {
+        console.log('No user found, setting coach to null')
         set({ coach: null, loading: false })
         return
       }
@@ -104,12 +107,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         .eq('id', user.id)
         .single()
 
+      console.log('Coach query result:', { coach, error })
+
       if (error) {
         console.error('Error fetching coach:', error)
         set({ coach: null, loading: false })
         return
       }
 
+      console.log('Setting coach:', coach)
       set({ coach, loading: false })
     } catch (error) {
       console.error('Error in getCurrentCoach:', error)
