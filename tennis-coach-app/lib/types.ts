@@ -28,8 +28,6 @@ export interface Player {
   name: string
   gender: 'male' | 'female'
   grade?: number
-  email?: string
-  phone?: string
   position_preference?: string
   team_level?: 'varsity' | 'jv' | 'freshman'
   utr_rating?: number

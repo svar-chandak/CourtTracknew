@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AddPlayerDialog } from '@/components/team/add-player-dialog'
 import { EditPlayerDialog } from '@/components/team/edit-player-dialog'
-import { Users, Plus, Edit, Trash2, Phone, Mail, GraduationCap } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
 
@@ -194,19 +194,6 @@ export default function TeamPage() {
                       </Badge>
                     )}
 
-                    {player.email && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Mail className="h-3 w-3 mr-1" />
-                        <span className="truncate">{player.email}</span>
-                      </div>
-                    )}
-
-                    {player.phone && (
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Phone className="h-3 w-3 mr-1" />
-                        <span>{player.phone}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}

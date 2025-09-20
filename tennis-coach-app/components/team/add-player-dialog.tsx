@@ -56,8 +56,6 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
         name: data.name,
         gender: data.gender,
         grade: data.grade,
-        email: data.email || undefined,
-        phone: data.phone || undefined,
         position_preference: data.position_preference || undefined,
         team_level: data.team_level || undefined,
         utr_rating: data.utr_rating || undefined,
@@ -140,31 +138,6 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="player@email.com"
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="(555) 123-4567"
-              {...register('phone')}
-            />
-            {errors.phone && (
-              <p className="text-sm text-red-600">{errors.phone.message}</p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="position_preference">Position Preference</Label>

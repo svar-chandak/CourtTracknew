@@ -31,8 +31,6 @@ export const playerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   gender: z.enum(['male', 'female']),
   grade: z.number().min(9).max(12).optional(),
-  email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional(),
   position_preference: z.enum(['boys_singles', 'girls_singles', 'boys_doubles', 'girls_doubles', 'mixed_doubles']).optional(),
   team_level: z.enum(['varsity', 'jv', 'freshman']).optional(),
   utr_rating: z.number().min(1).max(16).optional(),
