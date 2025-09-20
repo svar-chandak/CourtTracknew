@@ -35,14 +35,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ loading: true })
       
-      const { data: team, error } = await supabase
+      const { data: teams, error } = await supabase
         .from('teams')
         .select(`
           *,
           coach:coaches(*)
         `)
         .eq('coach_id', coachId)
-        .single()
 
       if (error) {
         console.error('Error fetching team:', error)
@@ -50,6 +49,8 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         return
       }
 
+      // Handle case where no team exists or multiple teams exist
+      const team = teams && teams.length > 0 ? teams[0] : null
       set({ currentTeam: team, loading: false })
     } catch (error) {
       console.error('Error in getCurrentTeam:', error)
