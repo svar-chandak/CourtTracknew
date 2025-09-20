@@ -15,13 +15,8 @@ export default function DashboardPage() {
   const { tournaments, loading: tournamentLoading, getTournaments } = useTournamentStore()
 
   useEffect(() => {
-    console.log('Dashboard page: getting current coach')
-    getCurrentCoach()
-  }, [getCurrentCoach])
-
-  useEffect(() => {
     console.log('Dashboard page: coach changed', coach)
-    if (coach) {
+    if (coach && coach.id) {
       console.log('Dashboard page: getting team and matches for coach', coach.id)
       getCurrentTeam(coach.id)
       getMatches(coach.id)
@@ -32,7 +27,7 @@ export default function DashboardPage() {
     getTournaments()
   }, [getTournaments])
 
-  if (authLoading || teamLoading) {
+  if (authLoading || teamLoading || !coach) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -43,7 +38,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (!coach || !currentTeam) {
+  if (!coach || !coach.id || !currentTeam) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to CourtTrack!</h2>
