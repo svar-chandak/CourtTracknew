@@ -350,8 +350,9 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
       }
 
       // Refresh tournament matches
-      if (get().currentTournament) {
-        await get().getTournamentMatches(get().currentTournament.id)
+      const currentTournament = get().currentTournament
+      if (currentTournament) {
+        await get().getTournamentMatches(currentTournament.id)
       }
 
       return { error: null }

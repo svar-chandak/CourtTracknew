@@ -60,7 +60,7 @@ export interface Tournament {
   name: string
   tournament_code: string
   creator_id: string
-  tournament_type: 'single_elimination' | 'round_robin' | 'dual_match'
+  tournament_type: 'single_elimination' | 'double_elimination' | 'round_robin' | 'swiss' | 'dual_match'
   max_teams: number
   status: 'open' | 'full' | 'in_progress' | 'completed'
   start_date?: string
