@@ -6,7 +6,7 @@ import { useTeamStore } from '@/stores/team-store'
 import { useTournamentStore } from '@/stores/tournament-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, Users, Trophy, TrendingUp, Clock, Plus, UserPlus } from 'lucide-react'
+import { Calendar, Users, Trophy, TrendingUp, Clock, Plus, UserPlus, MessageSquare, ClipboardCheck } from 'lucide-react'
 import Link from 'next/link'
 
 export default function DashboardPage() {
@@ -215,7 +215,7 @@ export default function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link href="/dashboard/team">
               <Button variant="outline" className="w-full justify-start">
                 <UserPlus className="h-4 w-4 mr-2" />
@@ -232,6 +232,24 @@ export default function DashboardPage() {
               <Button variant="outline" className="w-full justify-start">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Tournament
+              </Button>
+            </Link>
+            <Link href="/dashboard/announcements">
+              <Button variant="outline" className="w-full justify-start">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Send Announcement
+              </Button>
+            </Link>
+            <Link href="/dashboard/attendance">
+              <Button variant="outline" className="w-full justify-start">
+                <ClipboardCheck className="h-4 w-4 mr-2" />
+                Record Attendance
+              </Button>
+            </Link>
+            <Link href="/dashboard/lineups">
+              <Button variant="outline" className="w-full justify-start">
+                <Users className="h-4 w-4 mr-2" />
+                Create Lineup
               </Button>
             </Link>
           </div>

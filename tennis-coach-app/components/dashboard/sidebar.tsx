@@ -18,6 +18,8 @@ import {
   Home,
   UserPlus,
   Gamepad2,
+  MessageSquare,
+  ClipboardCheck,
 } from 'lucide-react'
 
 const navigation = [
@@ -26,6 +28,8 @@ const navigation = [
   { name: 'Matches', href: '/dashboard/matches', icon: Calendar },
   { name: 'Tournaments', href: '/dashboard/tournaments', icon: Trophy },
   { name: 'Lineups', href: '/dashboard/lineups', icon: Gamepad2 },
+  { name: 'Announcements', href: '/dashboard/announcements', icon: MessageSquare },
+  { name: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 

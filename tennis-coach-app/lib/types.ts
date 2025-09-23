@@ -157,6 +157,60 @@ export interface ChallengeMatch {
   approved_by_coach?: Coach
 }
 
+export interface Announcement {
+  id: string
+  team_id: string
+  coach_id: string
+  title: string
+  message: string
+  announcement_type: 'general' | 'match_reminder' | 'practice_change' | 'emergency'
+  is_urgent: boolean
+  sent_at: string
+  created_at: string
+  coach?: Coach
+  team?: Team
+}
+
+export interface Attendance {
+  id: string
+  team_id: string
+  player_id: string
+  event_type: 'practice' | 'match'
+  event_id?: string
+  event_date: string
+  status: 'present' | 'absent' | 'late' | 'excused'
+  notes?: string
+  recorded_by: string
+  created_at: string
+  player?: Player
+  team?: Team
+  recorded_by_coach?: Coach
+}
+
+export interface PracticeSession {
+  id: string
+  team_id: string
+  practice_date: string
+  practice_time?: string
+  location?: string
+  description?: string
+  coach_id: string
+  created_at: string
+  team?: Team
+  coach?: Coach
+}
+
+export interface NotificationPreferences {
+  id: string
+  player_id: string
+  email_notifications: boolean
+  sms_notifications: boolean
+  push_notifications: boolean
+  created_at: string
+  updated_at: string
+  player?: Player
+}
+
 export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
 export type TournamentStatus = 'open' | 'full' | 'in_progress' | 'completed'
 export type TournamentType = 'single_elimination' | 'round_robin' | 'dual_match'
@@ -166,3 +220,6 @@ export type Gender = 'male' | 'female'
 export type TeamGender = 'boys' | 'girls' | 'mixed'
 export type Division = 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
 export type MatchType = 'team_match' | 'individual'
+export type AnnouncementType = 'general' | 'match_reminder' | 'practice_change' | 'emergency'
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'excused'
+export type EventType = 'practice' | 'match'
