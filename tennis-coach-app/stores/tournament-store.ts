@@ -1,34 +1,46 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
+import { TournamentEngine } from '@/lib/tournament-engine'
 import type { Tournament, TournamentTeam, TournamentMatch } from '@/lib/types'
+import type { BracketMatch, TournamentBracket } from '@/lib/tournament-engine'
 
 interface TournamentState {
   tournaments: Tournament[]
   currentTournament: Tournament | null
+  tournamentTeams: TournamentTeam[]
   tournamentMatches: TournamentMatch[]
+  bracket: TournamentBracket | null
   loading: boolean
+  error: string | null
   
   // Tournament actions
   getTournaments: () => Promise<void>
   getTournament: (tournamentCode: string) => Promise<{ tournament: Tournament | null; error: string | null }>
+  getTournamentTeams: (tournamentId: string) => Promise<void>
   createTournament: (tournament: Omit<Tournament, 'id' | 'created_at' | 'tournament_code'>) => Promise<{ error: string | null }>
+  updateTournament: (id: string, updates: Partial<Tournament>) => Promise<{ error: string | null }>
   joinTournament: (tournamentCode: string, teamId: string) => Promise<{ error: string | null }>
   leaveTournament: (tournamentId: string, teamId: string) => Promise<{ error: string | null }>
   updateTournamentStatus: (tournamentId: string, status: Tournament['status']) => Promise<{ error: string | null }>
   
-  // Tournament matches
+  // Tournament matches and bracket
   getTournamentMatches: (tournamentId: string) => Promise<void>
   updateTournamentMatch: (matchId: string, updates: Partial<TournamentMatch>) => Promise<{ error: string | null }>
-  
-  // Bracket generation
+  updateBracketMatch: (matchId: string, updates: Partial<BracketMatch>) => Promise<{ error: string | null }>
   generateBracket: (tournamentId: string) => Promise<{ error: string | null }>
+  startTournament: (tournamentId: string) => Promise<{ error: string | null }>
+  endTournament: (tournamentId: string) => Promise<{ error: string | null }>
+  resetTournament: (tournamentId: string) => Promise<{ error: string | null }>
 }
 
 export const useTournamentStore = create<TournamentState>((set, get) => ({
   tournaments: [],
   currentTournament: null,
+  tournamentTeams: [],
   tournamentMatches: [],
+  bracket: null,
   loading: true,
+  error: null,
 
   getTournaments: async () => {
     try {
@@ -263,6 +275,134 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
     }
   },
 
+  getTournamentTeams: async (tournamentId: string) => {
+    try {
+      const { data: teams, error } = await supabase
+        .from('tournament_teams')
+        .select(`
+          *,
+          team:teams(*)
+        `)
+        .eq('tournament_id', tournamentId)
+        .order('joined_at', { ascending: true })
+
+      if (error) {
+        set({ error: error.message })
+        return
+      }
+
+      set({ tournamentTeams: teams || [] })
+    } catch (error) {
+      set({ error: 'Failed to fetch tournament teams' })
+    }
+  },
+
+  updateTournament: async (id: string, updates: Partial<Tournament>) => {
+    try {
+      const { error } = await supabase
+        .from('tournaments')
+        .update(updates)
+        .eq('id', id)
+
+      if (error) return { error: error.message }
+
+      // Update local state
+      const { tournaments, currentTournament } = get()
+      const updatedTournaments = tournaments.map(tournament =>
+        tournament.id === id ? { ...tournament, ...updates } : tournament
+      )
+      set({ tournaments: updatedTournaments })
+
+      if (currentTournament?.id === id) {
+        set({ currentTournament: { ...currentTournament, ...updates } })
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: 'Failed to update tournament' }
+    }
+  },
+
+  updateBracketMatch: async (matchId: string, updates: Partial<BracketMatch>) => {
+    try {
+      const { error } = await supabase
+        .from('tournament_matches')
+        .update({
+          ...updates,
+          winner_team_id: updates.winner?.team_id,
+          score_summary: updates.score,
+          status: updates.status || 'pending'
+        })
+        .eq('id', matchId)
+
+      if (error) return { error: error.message }
+
+      // Update local bracket state
+      const { bracket } = get()
+      if (bracket) {
+        const updatedMatches = bracket.matches.map(match =>
+          match.id === matchId ? { ...match, ...updates } : match
+        )
+        
+        // Use tournament engine to update bracket
+        const updatedBracket = TournamentEngine.getBracketSummary(updatedMatches)
+        set({ bracket: updatedBracket })
+      }
+
+      // Refresh tournament matches
+      if (get().currentTournament) {
+        await get().getTournamentMatches(get().currentTournament.id)
+      }
+
+      return { error: null }
+    } catch (error) {
+      return { error: 'Failed to update match' }
+    }
+  },
+
+  startTournament: async (tournamentId: string) => {
+    try {
+      const { error } = await get().updateTournamentStatus(tournamentId, 'in_progress')
+      if (error) return { error }
+      
+      return { error: null }
+    } catch (error) {
+      return { error: 'Failed to start tournament' }
+    }
+  },
+
+  endTournament: async (tournamentId: string) => {
+    try {
+      const { error } = await get().updateTournamentStatus(tournamentId, 'completed')
+      if (error) return { error }
+      
+      return { error: null }
+    } catch (error) {
+      return { error: 'Failed to end tournament' }
+    }
+  },
+
+  resetTournament: async (tournamentId: string) => {
+    try {
+      // Clear all matches
+      await supabase
+        .from('tournament_matches')
+        .delete()
+        .eq('tournament_id', tournamentId)
+
+      // Reset tournament status
+      const { error } = await get().updateTournamentStatus(tournamentId, 'open')
+      if (error) return { error }
+
+      // Clear local bracket
+      set({ bracket: null })
+
+      return { error: null }
+    } catch (error) {
+      return { error: 'Failed to reset tournament' }
+    }
+  },
+
   generateBracket: async (tournamentId: string) => {
     try {
       const tournament = get().currentTournament
@@ -283,16 +423,29 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
         .delete()
         .eq('tournament_id', tournamentId)
 
-      // Generate bracket based on tournament type
-      if (tournament.tournament_type === 'single_elimination') {
-        await generateSingleEliminationBracket(tournamentId, teams)
-      } else if (tournament.tournament_type === 'round_robin') {
-        await generateRoundRobinBracket(tournamentId, teams)
+      // Use tournament engine to generate bracket
+      const bracketMatches = TournamentEngine.generateBracket(tournament, teams)
+      
+      // Save matches to database
+      for (const match of bracketMatches) {
+        await supabase
+          .from('tournament_matches')
+          .insert({
+            tournament_id: tournamentId,
+            round_number: match.round,
+            match_number: match.matchNumber,
+            team1_id: match.team1?.team_id,
+            team2_id: match.team2?.team_id,
+            status: match.status,
+            score_summary: match.score,
+            winner_team_id: match.winner?.team_id
+          })
       }
 
-      // Update tournament status
-      await get().updateTournamentStatus(tournamentId, 'in_progress')
-      
+      // Create bracket summary
+      const bracket = TournamentEngine.getBracketSummary(bracketMatches)
+      set({ bracket })
+
       // Refresh matches
       await get().getTournamentMatches(tournamentId)
       

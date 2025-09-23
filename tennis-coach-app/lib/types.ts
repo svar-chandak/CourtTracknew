@@ -213,7 +213,7 @@ export interface NotificationPreferences {
 
 export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
 export type TournamentStatus = 'open' | 'full' | 'in_progress' | 'completed'
-export type TournamentType = 'single_elimination' | 'round_robin' | 'dual_match'
+export type TournamentType = 'single_elimination' | 'double_elimination' | 'round_robin' | 'swiss' | 'dual_match'
 export type TournamentMatchStatus = 'pending' | 'in_progress' | 'completed'
 export type TeamLevel = 'varsity' | 'jv' | 'freshman'
 export type Gender = 'male' | 'female'

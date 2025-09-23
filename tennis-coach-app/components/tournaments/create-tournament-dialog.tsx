@@ -110,14 +110,16 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
             <Label htmlFor="tournament_type">Tournament Type *</Label>
             <Select
               value={tournamentType || ''}
-              onValueChange={(value) => setValue('tournament_type', value as 'single_elimination' | 'round_robin' | 'dual_match')}
+                onValueChange={(value) => setValue('tournament_type', value as 'single_elimination' | 'double_elimination' | 'round_robin' | 'swiss' | 'dual_match')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select tournament type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="single_elimination">Single Elimination</SelectItem>
+                <SelectItem value="double_elimination">Double Elimination</SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>
+                <SelectItem value="swiss">Swiss System</SelectItem>
                 <SelectItem value="dual_match">Dual Match</SelectItem>
               </SelectContent>
             </Select>

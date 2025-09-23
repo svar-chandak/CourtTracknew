@@ -72,7 +72,7 @@ export const matchSchema = z.object({
 // Tournament validations
 export const tournamentSchema = z.object({
   name: z.string().min(3, 'Tournament name must be at least 3 characters'),
-  tournament_type: z.enum(['single_elimination', 'round_robin', 'dual_match']),
+  tournament_type: z.enum(['single_elimination', 'double_elimination', 'round_robin', 'swiss', 'dual_match']),
   max_teams: z.number().min(2).max(32),
   start_date: z.string().optional(),
   location: z.string().optional(),
