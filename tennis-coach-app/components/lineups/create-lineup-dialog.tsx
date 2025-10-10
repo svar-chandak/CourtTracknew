@@ -103,9 +103,20 @@ interface PositionDropZoneProps {
 function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggle, lineup }: PositionDropZoneProps & { lineup: Record<string, string[]> }) {
   const selectedPlayerObjects = selectedPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
   
+  // Get all players currently assigned to ANY position in the lineup
+  const allAssignedPlayers = Object.values(lineup).flat()
   
-  // Filter available players by gender for this position
-  let availablePlayers = allPlayers.filter(p => !selectedPlayers.includes(p.id))
+  // Filter available players - exclude players already assigned to ANY position
+  let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
+  
+  // Add back players who are selected in THIS position (they should show as available to deselect)
+  const currentPositionPlayers = lineup[position.id] || []
+  availablePlayers = [...availablePlayers, ...currentPositionPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]]
+  
+  // Remove duplicates
+  availablePlayers = availablePlayers.filter((player, index, self) => 
+    index === self.findIndex(p => p.id === player.id)
+  )
   
   if (position.gender === 'female') {
     availablePlayers = availablePlayers.filter(p => p.gender === 'female')
@@ -114,16 +125,6 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   } else if (position.gender === 'mixed') {
     // For mixed doubles, show all players but we'll validate in the toggle function
     availablePlayers = availablePlayers
-  }
-
-  // For singles positions, remove players who are already assigned to other singles positions
-  if (position.type === 'singles') {
-    const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
-    const otherSinglesPlayers = singlesPositions
-      .filter(posId => posId !== position.id)
-      .flatMap(posId => lineup[posId] || [])
-    
-    availablePlayers = availablePlayers.filter(p => !otherSinglesPlayers.includes(p.id))
   }
 
   // Sort players by name to maintain consistent roster order
@@ -230,7 +231,15 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         } else if (current.length < position.maxPlayers) {
           // Add player if we don't already have both genders or if this player completes the pair
           if (current.length === 0 || (current.length === 1 && ((hasMale && player.gender === 'female') || (hasFemale && player.gender === 'male')))) {
-            return { ...prev, [positionId]: [...current, playerId] }
+            // Remove player from all other positions first
+            const newLineup = { ...prev }
+            Object.keys(newLineup).forEach(posId => {
+              if (posId !== positionId) {
+                newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
+              }
+            })
+            newLineup[positionId] = [...current, playerId]
+            return newLineup
           } else {
             toast.error('Mixed doubles needs one boy and one girl')
             return prev
@@ -241,17 +250,18 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           // Remove player
           return { ...prev, [positionId]: current.filter(id => id !== playerId) }
         } else if (current.length < position.maxPlayers) {
-          // Add player and remove from other singles positions if this is a singles position
-          const newLineup = { ...prev, [positionId]: [...current, playerId] }
+          // Add player and remove from ALL other positions (not just singles)
+          const newLineup = { ...prev }
           
-          if (position.type === 'singles') {
-            const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
-            singlesPositions.forEach(posId => {
-              if (posId !== positionId) {
-                newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
-              }
-            })
-          }
+          // Remove player from all other positions first
+          Object.keys(newLineup).forEach(posId => {
+            if (posId !== positionId) {
+              newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
+            }
+          })
+          
+          // Add player to current position
+          newLineup[positionId] = [...current, playerId]
           
           return newLineup
         }
