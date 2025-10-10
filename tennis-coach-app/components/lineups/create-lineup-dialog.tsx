@@ -51,17 +51,23 @@ interface DraggablePlayerProps {
   isSelected: boolean
   onToggle: () => void
   disabled?: boolean
+  positionGender?: 'male' | 'female' | 'mixed'
 }
 
-function DraggablePlayer({ player, isSelected, onToggle, disabled }: DraggablePlayerProps) {
+function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGender }: DraggablePlayerProps) {
+  // Check if this player can be placed in this position
+  const canPlace = !positionGender || positionGender === 'mixed' || positionGender === player.gender
+  
   return (
     <div
       className={`p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
-          : 'bg-white border-gray-200 hover:border-gray-300'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={disabled ? undefined : onToggle}
+          : canPlace 
+            ? 'bg-white border-gray-200 hover:border-gray-300'
+            : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
+      } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
+      onClick={disabled || !canPlace ? undefined : onToggle}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
@@ -90,7 +96,18 @@ interface PositionDropZoneProps {
 
 function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggle }: PositionDropZoneProps) {
   const selectedPlayerObjects = selectedPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
-  const availablePlayers = allPlayers.filter(p => !selectedPlayers.includes(p.id))
+  
+  // Filter available players by gender for this position
+  let availablePlayers = allPlayers.filter(p => !selectedPlayers.includes(p.id))
+  
+  if (position.gender === 'female') {
+    availablePlayers = availablePlayers.filter(p => p.gender === 'female')
+  } else if (position.gender === 'male') {
+    availablePlayers = availablePlayers.filter(p => p.gender === 'male')
+  } else if (position.gender === 'mixed') {
+    // For mixed doubles, show all players but we'll validate in the toggle function
+    availablePlayers = availablePlayers
+  }
 
   return (
     <Card className="min-h-[200px]">
@@ -114,6 +131,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
                   player={player}
                   isSelected={true}
                   onToggle={() => onPlayerToggle(position.id, player.id)}
+                  positionGender={position.gender as 'male' | 'female' | 'mixed'}
                 />
               ))}
             </div>
@@ -136,6 +154,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
                   isSelected={false}
                   onToggle={() => onPlayerToggle(position.id, player.id)}
                   disabled={selectedPlayers.length >= position.maxPlayers}
+                  positionGender={position.gender as 'male' | 'female' | 'mixed'}
                 />
               ))}
             </div>
@@ -230,7 +249,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
     if (!player || !position) return
 
-    // Check gender validation
+    // Check gender validation - prevent dropping wrong gender
     if (position.gender !== 'mixed' && position.gender !== player.gender) {
       toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
       return
