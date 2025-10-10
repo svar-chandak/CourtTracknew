@@ -16,7 +16,7 @@ interface TeamState {
   
   // Player actions
   getPlayers: (teamId: string) => Promise<void>
-  addPlayer: (player: Omit<Player, 'id' | 'created_at'>) => Promise<{ error: string | null }>
+  addPlayer: (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => Promise<{ error: string | null }>
   updatePlayer: (playerId: string, updates: Partial<Player>) => Promise<{ error: string | null }>
   deletePlayer: (playerId: string) => Promise<{ error: string | null }>
   
@@ -158,17 +158,42 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     }
   },
 
-  addPlayer: async (player: Omit<Player, 'id' | 'created_at'>) => {
+  addPlayer: async (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => {
     try {
-      // Filter out undefined values and new fields that might not exist in DB yet
-      const playerData = Object.fromEntries(
-        Object.entries(player).filter(([key, value]) => {
-          // Only include fields that have values
-          if (value === undefined || value === null) return false
-          // Temporarily exclude new fields if they cause issues
-          return true
-        })
-      )
+      // Generate a unique player ID
+      const generatePlayerId = () => {
+        return Math.random().toString(36).substring(2, 8).toUpperCase()
+      }
+
+      let playerId = generatePlayerId()
+      let attempts = 0
+      const maxAttempts = 10
+
+      // Ensure unique player ID
+      while (attempts < maxAttempts) {
+        const { data: existing } = await supabase
+          .from('players')
+          .select('id')
+          .eq('player_id', playerId)
+          .single()
+
+        if (!existing) break
+        
+        playerId = generatePlayerId()
+        attempts++
+      }
+
+      if (attempts >= maxAttempts) {
+        return { error: 'Failed to generate unique player ID' }
+      }
+
+      // Prepare player data with generated player_id
+      const playerData = {
+        ...player,
+        player_id: playerId,
+        // Remove fields that might not exist in the database yet
+        password_hash: undefined,
+      }
 
       console.log('Attempting to insert player:', playerData)
 

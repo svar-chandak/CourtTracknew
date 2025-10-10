@@ -25,12 +25,16 @@ export interface Team {
 export interface Player {
   id: string
   team_id: string
+  player_id: string // Student login ID
   name: string
+  email?: string // Student login email
+  password_hash?: string // Student login password
   gender: 'male' | 'female'
   grade?: number
-  position_preference?: string
+  position_preference?: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
   team_level?: 'varsity' | 'jv' | 'freshman'
   utr_rating?: number
+  phone?: string
   created_at: string
   team?: Team
 }
@@ -209,6 +213,29 @@ export interface NotificationPreferences {
   created_at: string
   updated_at: string
   player?: Player
+}
+
+// Student authentication types
+export interface StudentAuth {
+  player: Player | null
+  loading: boolean
+  signIn: (playerId: string, password: string) => Promise<{ error: string | null }>
+  signOut: () => Promise<void>
+  getCurrentPlayer: () => Promise<void>
+}
+
+// Match history for students
+export interface PlayerMatchHistory {
+  match: Match
+  division: string
+  position_number: number
+  player_names: string[]
+  opponent_names: string[]
+  sets_won: number
+  sets_lost: number
+  winner: 'home' | 'away'
+  score_details: Record<string, unknown>
+  is_winner: boolean
 }
 
 export type MatchStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'

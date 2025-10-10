@@ -20,6 +20,7 @@ import {
   Gamepad2,
   MessageSquare,
   ClipboardCheck,
+  BookOpen,
 } from 'lucide-react'
 
 const navigation = [
@@ -31,6 +32,7 @@ const navigation = [
   { name: 'Announcements', href: '/dashboard/announcements', icon: MessageSquare },
   { name: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'User Guide', href: '/guide', icon: BookOpen },
 ]
 
 export function DashboardSidebar() {

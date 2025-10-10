@@ -196,6 +196,9 @@ export default function TeamPage() {
                               <div className="flex items-start justify-between mb-2">
                                 <div>
                                   <h5 className="font-medium">{player.name}</h5>
+                                  <p className="text-xs text-gray-500 font-mono">
+                                    ID: {player.player_id}
+                                  </p>
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
                                       Prefers: {player.position_preference.replace('_', ' ')}
@@ -252,6 +255,9 @@ export default function TeamPage() {
                               <div className="flex items-start justify-between mb-2">
                                 <div>
                                   <h5 className="font-medium">{player.name}</h5>
+                                  <p className="text-xs text-gray-500 font-mono">
+                                    ID: {player.player_id}
+                                  </p>
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
                                       Prefers: {player.position_preference.replace('_', ' ')}

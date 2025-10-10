@@ -6,7 +6,7 @@ import { useTeamStore } from '@/stores/team-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Gamepad2, Plus, Users, Calendar, Trophy } from 'lucide-react'
+import { Gamepad2, Plus, Users, Trophy } from 'lucide-react'
 import { CreateLineupDialog } from '@/components/lineups/create-lineup-dialog'
 
 export default function LineupsPage() {
@@ -289,7 +289,7 @@ export default function LineupsPage() {
                 <Button variant="outline">
                   Save as Template
                 </Button>
-                <Button>
+                <Button onClick={() => setShowCreateDialog(true)}>
                   Create Lineup
                 </Button>
               </div>

@@ -8,12 +8,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Plus, MapPin, Clock, Users, Trophy } from 'lucide-react'
 import { ScheduleMatchDialog } from '@/components/matches/schedule-match-dialog'
+import { MatchDetailsDialog } from '@/components/matches/match-details-dialog'
 import Link from 'next/link'
+import type { Match } from '@/lib/types'
 
 export default function MatchesPage() {
   const { coach } = useAuthStore()
   const { currentTeam, matches, loading, getCurrentTeam, getMatches } = useTeamStore()
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
+  const [showMatchDetails, setShowMatchDetails] = useState(false)
 
   useEffect(() => {
     if (coach?.id) {
@@ -172,7 +176,14 @@ export default function MatchesPage() {
                       </div>
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedMatch(match)
+                          setShowMatchDetails(true)
+                        }}
+                      >
                         View Details
                       </Button>
                       <Button variant="outline" size="sm">
@@ -246,7 +257,14 @@ export default function MatchesPage() {
                       )}
                     </div>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedMatch(match)
+                          setShowMatchDetails(true)
+                        }}
+                      >
                         View Details
                       </Button>
                     </div>
@@ -266,6 +284,13 @@ export default function MatchesPage() {
           onOpenChange={setShowScheduleDialog}
         />
       )}
+
+      {/* Match Details Dialog */}
+      <MatchDetailsDialog
+        match={selectedMatch}
+        open={showMatchDetails}
+        onOpenChange={setShowMatchDetails}
+      />
     </div>
   )
 }
