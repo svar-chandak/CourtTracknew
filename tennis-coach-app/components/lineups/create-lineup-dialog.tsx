@@ -33,17 +33,23 @@ interface CreateLineupDialogProps {
 }
 
 const positions = [
-  { id: '1GS', name: '1st Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
-  { id: '2GS', name: '2nd Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
-  { id: '3GS', name: '3rd Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
-  { id: '1BS', name: '1st Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
-  { id: '2BS', name: '2nd Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
-  { id: '3BS', name: '3rd Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
-  { id: '1GD', name: '1st Girls Doubles', type: 'doubles', gender: 'female', maxPlayers: 2 },
-  { id: '2GD', name: '2nd Girls Doubles', type: 'doubles', gender: 'female', maxPlayers: 2 },
-  { id: '1BD', name: '1st Boys Doubles', type: 'doubles', gender: 'male', maxPlayers: 2 },
-  { id: '2BD', name: '2nd Boys Doubles', type: 'doubles', gender: 'male', maxPlayers: 2 },
-  { id: 'MD', name: 'Mixed Doubles', type: 'mixed', gender: 'mixed', maxPlayers: 2 },
+  { id: '1GS', name: 'Girls Line 1', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 1 },
+  { id: '2GS', name: 'Girls Line 2', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 2 },
+  { id: '3GS', name: 'Girls Line 3', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 3 },
+  { id: '4GS', name: 'Girls Line 4', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 4 },
+  { id: '5GS', name: 'Girls Line 5', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 5 },
+  { id: '6GS', name: 'Girls Line 6', type: 'singles', gender: 'female', maxPlayers: 1, rosterOrder: 6 },
+  { id: '1BS', name: 'Boys Line 1', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 1 },
+  { id: '2BS', name: 'Boys Line 2', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 2 },
+  { id: '3BS', name: 'Boys Line 3', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 3 },
+  { id: '4BS', name: 'Boys Line 4', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 4 },
+  { id: '5BS', name: 'Boys Line 5', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 5 },
+  { id: '6BS', name: 'Boys Line 6', type: 'singles', gender: 'male', maxPlayers: 1, rosterOrder: 6 },
+  { id: '1GD', name: 'Girls Doubles 1', type: 'doubles', gender: 'female', maxPlayers: 2, rosterOrder: 7 },
+  { id: '2GD', name: 'Girls Doubles 2', type: 'doubles', gender: 'female', maxPlayers: 2, rosterOrder: 8 },
+  { id: '1BD', name: 'Boys Doubles 1', type: 'doubles', gender: 'male', maxPlayers: 2, rosterOrder: 7 },
+  { id: '2BD', name: 'Boys Doubles 2', type: 'doubles', gender: 'male', maxPlayers: 2, rosterOrder: 8 },
+  { id: 'MD', name: 'Mixed Doubles', type: 'mixed', gender: 'mixed', maxPlayers: 2, rosterOrder: 9 },
 ]
 
 interface DraggablePlayerProps {
@@ -109,6 +115,9 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
     availablePlayers = availablePlayers
   }
 
+  // Sort players by name to maintain consistent roster order
+  availablePlayers = availablePlayers.sort((a, b) => a.name.localeCompare(b.name))
+
   return (
     <Card className="min-h-[200px]">
       <CardHeader className="pb-3">
@@ -170,10 +179,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
   const [activePlayer, setActivePlayer] = useState<Player | null>(null)
 
-  // Filter players by selected team level
+  // Filter players by selected team level and sort by name to maintain roster order
   const filteredPlayers = selectedTeamLevel 
-    ? players.filter(player => player.team_level === selectedTeamLevel)
-    : players
+    ? players.filter(player => player.team_level === selectedTeamLevel).sort((a, b) => a.name.localeCompare(b.name))
+    : players.sort((a, b) => a.name.localeCompare(b.name))
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
