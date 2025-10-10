@@ -100,8 +100,9 @@ interface PositionDropZoneProps {
   onPlayerToggle: (positionId: string, playerId: string) => void
 }
 
-function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggle }: PositionDropZoneProps) {
+function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggle, lineup }: PositionDropZoneProps & { lineup: Record<string, string[]> }) {
   const selectedPlayerObjects = selectedPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
+  
   
   // Filter available players by gender for this position
   let availablePlayers = allPlayers.filter(p => !selectedPlayers.includes(p.id))
@@ -113,6 +114,16 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   } else if (position.gender === 'mixed') {
     // For mixed doubles, show all players but we'll validate in the toggle function
     availablePlayers = availablePlayers
+  }
+
+  // For singles positions, remove players who are already assigned to other singles positions
+  if (position.type === 'singles') {
+    const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+    const otherSinglesPlayers = singlesPositions
+      .filter(posId => posId !== position.id)
+      .flatMap(posId => lineup[posId] || [])
+    
+    availablePlayers = availablePlayers.filter(p => !otherSinglesPlayers.includes(p.id))
   }
 
   // Sort players by name to maintain consistent roster order
@@ -230,8 +241,19 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           // Remove player
           return { ...prev, [positionId]: current.filter(id => id !== playerId) }
         } else if (current.length < position.maxPlayers) {
-          // Add player
-          return { ...prev, [positionId]: [...current, playerId] }
+          // Add player and remove from other singles positions if this is a singles position
+          const newLineup = { ...prev, [positionId]: [...current, playerId] }
+          
+          if (position.type === 'singles') {
+            const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+            singlesPositions.forEach(posId => {
+              if (posId !== positionId) {
+                newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
+              }
+            })
+          }
+          
+          return newLineup
         }
       }
       
@@ -291,6 +313,16 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       newLineup[posId] = newLineup[posId].filter(id => id !== playerId)
     })
 
+    // If assigning to a singles position, remove player from all other singles positions
+    if (position.type === 'singles') {
+      const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+      singlesPositions.forEach(posId => {
+        if (posId !== positionId) {
+          newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
+        }
+      })
+    }
+
     // Add player to new position
     newLineup[positionId] = [...(newLineup[positionId] || []), playerId]
 
@@ -340,6 +372,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
                     selectedPlayers={lineup[position.id] || []}
                     allPlayers={filteredPlayers}
                     onPlayerToggle={handlePlayerToggle}
+                    lineup={lineup}
                   />
                 </div>
               ))}
