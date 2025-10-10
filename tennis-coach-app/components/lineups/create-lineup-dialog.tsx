@@ -103,11 +103,25 @@ interface PositionDropZoneProps {
 function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggle, lineup }: PositionDropZoneProps & { lineup: Record<string, string[]> }) {
   const selectedPlayerObjects = selectedPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
   
-  // Get all players currently assigned to ANY position in the lineup
-  const allAssignedPlayers = Object.values(lineup).flat()
+  // Get players assigned to conflicting positions
+  let conflictingPlayers: string[] = []
   
-  // Filter available players - exclude players already assigned to ANY position
-  let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
+  if (position.type === 'singles') {
+    // For singles: exclude players already in ANY other singles position
+    const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+    conflictingPlayers = singlesPositions
+      .filter(posId => posId !== position.id)
+      .flatMap(posId => lineup[posId] || [])
+  } else if (position.type === 'doubles' || position.type === 'mixed') {
+    // For any doubles position: exclude players already in ANY other doubles position (regular or mixed)
+    const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
+    conflictingPlayers = doublesPositions
+      .filter(posId => posId !== position.id)
+      .flatMap(posId => lineup[posId] || [])
+  }
+  
+  // Filter available players - exclude players in conflicting positions
+  let availablePlayers = allPlayers.filter(p => !conflictingPlayers.includes(p.id))
   
   // Add back players who are selected in THIS position (they should show as available to deselect)
   const currentPositionPlayers = lineup[position.id] || []
@@ -250,14 +264,25 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           // Remove player
           return { ...prev, [positionId]: current.filter(id => id !== playerId) }
         } else if (current.length < position.maxPlayers) {
-          // Add player and remove from ALL other positions (not just singles)
+          // Add player and remove from conflicting positions
           const newLineup = { ...prev }
           
-          // Remove player from all other positions first
-          Object.keys(newLineup).forEach(posId => {
-            if (posId !== positionId) {
-              newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
-            }
+          // Determine which positions conflict with this one
+          let conflictingPositions: string[] = []
+          
+          if (position.type === 'singles') {
+            // For singles: remove from other singles positions
+            const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+            conflictingPositions = singlesPositions.filter(posId => posId !== positionId)
+          } else if (position.type === 'doubles' || position.type === 'mixed') {
+            // For any doubles position: remove from other doubles positions (regular or mixed)
+            const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
+            conflictingPositions = doublesPositions.filter(posId => posId !== positionId)
+          }
+          
+          // Remove player from conflicting positions
+          conflictingPositions.forEach(posId => {
+            newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
           })
           
           // Add player to current position
@@ -317,21 +342,26 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       }
     }
 
-    // Remove player from any other position
+    // Remove player from conflicting positions
     const newLineup = { ...lineup }
-    Object.keys(newLineup).forEach(posId => {
-      newLineup[posId] = newLineup[posId].filter(id => id !== playerId)
-    })
-
-    // If assigning to a singles position, remove player from all other singles positions
+    
+    // Determine which positions conflict with this one
+    let conflictingPositions: string[] = []
+    
     if (position.type === 'singles') {
+      // For singles: remove from other singles positions
       const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
-      singlesPositions.forEach(posId => {
-        if (posId !== positionId) {
-          newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
-        }
-      })
+      conflictingPositions = singlesPositions.filter(posId => posId !== positionId)
+    } else if (position.type === 'doubles' || position.type === 'mixed') {
+      // For any doubles position: remove from other doubles positions (regular or mixed)
+      const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
+      conflictingPositions = doublesPositions.filter(posId => posId !== positionId)
     }
+    
+    // Remove player from conflicting positions
+    conflictingPositions.forEach(posId => {
+      newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
+    })
 
     // Add player to new position
     newLineup[positionId] = [...(newLineup[positionId] || []), playerId]
