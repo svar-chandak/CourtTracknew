@@ -1,9 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { lineupSchema, type LineupFormData } from '@/lib/validations'
 import {
   DndContext,
   DragEndEvent,
@@ -13,10 +10,6 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
 import {
   Dialog,
   DialogContent,
@@ -164,12 +157,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     })
   )
 
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LineupFormData>({
-    resolver: zodResolver(lineupSchema),
-  })
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
     setLineup(prev => {
@@ -223,7 +210,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     setLineup(newLineup)
   }
 
-  const onSubmit = async (data: LineupFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true)
     
     try {
@@ -257,7 +244,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {positions.map((position) => (
                 <div key={position.id} id={position.id}>
@@ -336,11 +323,11 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button onClick={onSubmit} disabled={isLoading}>
                 {isLoading ? 'Creating...' : 'Create Lineup'}
               </Button>
             </div>
-          </form>
+          </div>
 
           <DragOverlay>
             {activePlayer ? (
