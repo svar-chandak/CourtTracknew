@@ -17,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,18 +29,21 @@ interface CreateLineupDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onLineupCreated?: (lineup: Record<string, string[]>) => void
+  selectedTeamLevel?: 'varsity' | 'jv' | 'freshman'
 }
 
 const positions = [
-  { id: '1S', name: '1st Singles', type: 'singles', maxPlayers: 1 },
-  { id: '2S', name: '2nd Singles', type: 'singles', maxPlayers: 1 },
-  { id: '3S', name: '3rd Singles', type: 'singles', maxPlayers: 1 },
-  { id: '4S', name: '4th Singles', type: 'singles', maxPlayers: 1 },
-  { id: '5S', name: '5th Singles', type: 'singles', maxPlayers: 1 },
-  { id: '6S', name: '6th Singles', type: 'singles', maxPlayers: 1 },
-  { id: '1D', name: '1st Doubles', type: 'doubles', maxPlayers: 2 },
-  { id: '2D', name: '2nd Doubles', type: 'doubles', maxPlayers: 2 },
-  { id: '3D', name: '3rd Doubles', type: 'doubles', maxPlayers: 2 },
+  { id: '1GS', name: '1st Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
+  { id: '2GS', name: '2nd Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
+  { id: '3GS', name: '3rd Girls Singles', type: 'singles', gender: 'female', maxPlayers: 1 },
+  { id: '1BS', name: '1st Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
+  { id: '2BS', name: '2nd Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
+  { id: '3BS', name: '3rd Boys Singles', type: 'singles', gender: 'male', maxPlayers: 1 },
+  { id: '1GD', name: '1st Girls Doubles', type: 'doubles', gender: 'female', maxPlayers: 2 },
+  { id: '2GD', name: '2nd Girls Doubles', type: 'doubles', gender: 'female', maxPlayers: 2 },
+  { id: '1BD', name: '1st Boys Doubles', type: 'doubles', gender: 'male', maxPlayers: 2 },
+  { id: '2BD', name: '2nd Boys Doubles', type: 'doubles', gender: 'male', maxPlayers: 2 },
+  { id: 'MD', name: 'Mixed Doubles', type: 'mixed', gender: 'mixed', maxPlayers: 2 },
 ]
 
 interface DraggablePlayerProps {
@@ -144,10 +146,15 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   )
 }
 
-export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated }: CreateLineupDialogProps) {
+export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel }: CreateLineupDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
   const [activePlayer, setActivePlayer] = useState<Player | null>(null)
+
+  // Filter players by selected team level
+  const filteredPlayers = selectedTeamLevel 
+    ? players.filter(player => player.team_level === selectedTeamLevel)
+    : players
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -162,13 +169,42 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     setLineup(prev => {
       const current = prev[positionId] || []
       const position = positions.find(p => p.id === positionId)
+      const player = filteredPlayers.find(p => p.id === playerId)
       
-      if (current.includes(playerId)) {
-        // Remove player
-        return { ...prev, [positionId]: current.filter(id => id !== playerId) }
-      } else if (current.length < (position?.maxPlayers || 1)) {
-        // Add player
-        return { ...prev, [positionId]: [...current, playerId] }
+      if (!position || !player) return prev
+      
+      // Check gender validation
+      if (position.gender !== 'mixed' && position.gender !== player.gender) {
+        toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
+        return prev
+      }
+      
+      // For mixed doubles, check if we have one of each gender
+      if (position.gender === 'mixed') {
+        const currentPlayers = current.map(id => filteredPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
+        const hasMale = currentPlayers.some(p => p.gender === 'male')
+        const hasFemale = currentPlayers.some(p => p.gender === 'female')
+        
+        if (current.includes(playerId)) {
+          // Remove player
+          return { ...prev, [positionId]: current.filter(id => id !== playerId) }
+        } else if (current.length < position.maxPlayers) {
+          // Add player if we don't already have both genders or if this player completes the pair
+          if (current.length === 0 || (current.length === 1 && ((hasMale && player.gender === 'female') || (hasFemale && player.gender === 'male')))) {
+            return { ...prev, [positionId]: [...current, playerId] }
+          } else {
+            toast.error('Mixed doubles needs one boy and one girl')
+            return prev
+          }
+        }
+      } else {
+        if (current.includes(playerId)) {
+          // Remove player
+          return { ...prev, [positionId]: current.filter(id => id !== playerId) }
+        } else if (current.length < position.maxPlayers) {
+          // Add player
+          return { ...prev, [positionId]: [...current, playerId] }
+        }
       }
       
       return prev
@@ -177,7 +213,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
   const handleDragStart = (event: DragStartEvent) => {
     const playerId = event.active.id as string
-    const player = players.find(p => p.id === playerId)
+    const player = filteredPlayers.find(p => p.id === playerId)
     setActivePlayer(player || null)
   }
 
@@ -189,14 +225,37 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
     const playerId = active.id as string
     const positionId = over.id as string
+    const player = filteredPlayers.find(p => p.id === playerId)
+    const position = positions.find(p => p.id === positionId)
+
+    if (!player || !position) return
+
+    // Check gender validation
+    if (position.gender !== 'mixed' && position.gender !== player.gender) {
+      toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
+      return
+    }
 
     // Check if player is already in this position
     const currentPositionPlayers = lineup[positionId] || []
     if (currentPositionPlayers.includes(playerId)) return
 
     // Check if position can accommodate more players
-    const position = positions.find(p => p.id === positionId)
-    if (!position || currentPositionPlayers.length >= position.maxPlayers) return
+    if (currentPositionPlayers.length >= position.maxPlayers) return
+
+    // For mixed doubles, check gender requirements
+    if (position.gender === 'mixed') {
+      const currentPlayers = currentPositionPlayers.map(id => filteredPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
+      const hasMale = currentPlayers.some(p => p.gender === 'male')
+      const hasFemale = currentPlayers.some(p => p.gender === 'female')
+      
+      if (currentPositionPlayers.length === 1) {
+        if ((hasMale && player.gender === 'male') || (hasFemale && player.gender === 'female')) {
+          toast.error('Mixed doubles needs one boy and one girl')
+          return
+        }
+      }
+    }
 
     // Remove player from any other position
     const newLineup = { ...lineup }
@@ -251,7 +310,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
                   <PositionDropZone
                     position={position}
                     selectedPlayers={lineup[position.id] || []}
-                    allPlayers={players}
+                    allPlayers={filteredPlayers}
                     onPlayerToggle={handlePlayerToggle}
                   />
                 </div>
@@ -278,7 +337,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
                             <span className="font-medium">{position.name}:</span>{' '}
                             {selectedPlayers.length > 0 ? (
                               <span className="text-green-600">
-                                {selectedPlayers.map(id => players.find(p => p.id === id)?.name).join(', ')}
+                                {selectedPlayers.map(id => filteredPlayers.find(p => p.id === id)?.name).join(', ')}
                               </span>
                             ) : (
                               <span className="text-gray-400">Not assigned</span>
@@ -291,14 +350,14 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
                   <div>
                     <h4 className="font-medium text-sm mb-2">Doubles</h4>
                     <div className="space-y-1">
-                      {positions.filter(p => p.type === 'doubles').map(position => {
+                      {positions.filter(p => p.type === 'doubles' || p.type === 'mixed').map(position => {
                         const selectedPlayers = lineup[position.id] || []
                         return (
                           <div key={position.id} className="text-sm">
                             <span className="font-medium">{position.name}:</span>{' '}
                             {selectedPlayers.length > 0 ? (
                               <span className="text-green-600">
-                                {selectedPlayers.map(id => players.find(p => p.id === id)?.name).join(', ')}
+                                {selectedPlayers.map(id => filteredPlayers.find(p => p.id === id)?.name).join(', ')}
                               </span>
                             ) : (
                               <span className="text-gray-400">Not assigned</span>
@@ -312,21 +371,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
               </CardContent>
             </Card>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setLineup({})
-                  onOpenChange(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={onSubmit} disabled={isLoading}>
-                {isLoading ? 'Creating...' : 'Create Lineup'}
-              </Button>
-            </div>
           </div>
 
           <DragOverlay>

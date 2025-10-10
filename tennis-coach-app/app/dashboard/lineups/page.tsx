@@ -318,6 +318,7 @@ export default function LineupsPage() {
         players={players}
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
+        selectedTeamLevel={selectedTeamLevel || undefined}
       />
     </div>
   )
