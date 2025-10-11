@@ -81,12 +81,19 @@ export default function LineupsPage() {
   const getDialogLineupFormat = (): Record<string, string[]> => {
     const dialogLineup: Record<string, string[]> = {}
     
+    console.log('=== DEBUGGING LINEUP LOADING ===')
+    console.log('Lineups from database:', lineups)
+    console.log('Lineups length:', lineups.length)
+    
     if (lineups.length === 0) {
+      console.log('No lineups found in database')
       return dialogLineup
     }
     
-    lineups.forEach(lineup => {
+    lineups.forEach((lineup, index) => {
+      console.log(`Processing lineup ${index}:`, lineup)
       const { position, player_ids } = lineup
+      console.log('Position:', position, 'Player IDs:', player_ids)
       
       // Map database position names to dialog position IDs
       let positionId: string
@@ -95,37 +102,49 @@ export default function LineupsPage() {
       if (position.startsWith('boys_singles_')) {
         const order = position.split('_')[2]
         positionId = `${order}BS`
+        console.log(`Mapped ${position} -> ${positionId}`)
       } else if (position.startsWith('girls_singles_')) {
         const order = position.split('_')[2]
         positionId = `${order}GS`
+        console.log(`Mapped ${position} -> ${positionId}`)
       } else if (position.startsWith('boys_doubles_')) {
         const order = position.split('_')[2]
         // Map roster order to position ID (7->1, 8->2)
         const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
         positionId = `${positionNumber}BD`
+        console.log(`Mapped ${position} -> ${positionId}`)
       } else if (position.startsWith('girls_doubles_')) {
         const order = position.split('_')[2]
         // Map roster order to position ID (7->1, 8->2)
         const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
         positionId = `${positionNumber}GD`
+        console.log(`Mapped ${position} -> ${positionId}`)
       } else if (position === 'mixed_doubles_1') {
         positionId = 'MD'
+        console.log(`Mapped ${position} -> ${positionId}`)
       } else if (position === '1GS' || position === '2GS' || position === '3GS' || position === '4GS' || position === '5GS' || position === '6GS') {
         // Already in dialog format
         positionId = position
+        console.log(`Already in dialog format: ${position}`)
       } else if (position === '1BS' || position === '2BS' || position === '3BS' || position === '4BS' || position === '5BS' || position === '6BS') {
         // Already in dialog format
         positionId = position
+        console.log(`Already in dialog format: ${position}`)
       } else if (position === '1GD' || position === '2GD' || position === '1BD' || position === '2BD' || position === 'MD') {
         // Already in dialog format
         positionId = position
+        console.log(`Already in dialog format: ${position}`)
       } else {
+        console.log('Unknown position format:', position)
         return // Skip unknown positions
       }
       
       dialogLineup[positionId] = player_ids || []
+      console.log(`Added to dialog lineup: ${positionId} = ${player_ids}`)
     })
     
+    console.log('Final dialog lineup:', dialogLineup)
+    console.log('=== END DEBUGGING ===')
     return dialogLineup
   }
 
