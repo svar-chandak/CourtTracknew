@@ -77,6 +77,39 @@ export default function LineupsPage() {
     return currentLineup
   }
 
+  // Convert lineup data from database format to dialog format
+  const getDialogLineupFormat = (): Record<string, string[]> => {
+    const dialogLineup: Record<string, string[]> = {}
+    
+    lineups.forEach(lineup => {
+      const { position, player_ids } = lineup
+      
+      // Map database position names to dialog position IDs
+      let positionId: string
+      if (position.startsWith('boys_singles_')) {
+        const order = position.split('_')[2]
+        positionId = `${order}BS`
+      } else if (position.startsWith('girls_singles_')) {
+        const order = position.split('_')[2]
+        positionId = `${order}GS`
+      } else if (position.startsWith('boys_doubles_')) {
+        const order = position.split('_')[2]
+        positionId = `${order}BD`
+      } else if (position.startsWith('girls_doubles_')) {
+        const order = position.split('_')[2]
+        positionId = `${order}GD`
+      } else if (position === 'mixed_doubles_1') {
+        positionId = 'MD'
+      } else {
+        return // Skip unknown positions
+      }
+      
+      dialogLineup[positionId] = player_ids || []
+    })
+    
+    return dialogLineup
+  }
+
   const currentLineup = getCurrentLineup()
 
   if (loading) {
@@ -428,6 +461,7 @@ export default function LineupsPage() {
         onOpenChange={setShowCreateDialog}
         selectedTeamLevel={selectedTeamLevel || undefined}
         teamId={currentTeam?.id}
+        currentLineup={getDialogLineupFormat()}
         onLineupCreated={() => {
           if (currentTeam) {
             loadLineups(currentTeam.id)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -33,6 +33,7 @@ interface CreateLineupDialogProps {
   onLineupCreated?: (lineup: Record<string, string[]>) => void
   selectedTeamLevel?: 'varsity' | 'jv' | 'freshman'
   teamId?: string
+  currentLineup?: Record<string, string[]>
 }
 
 const positions = [
@@ -205,10 +206,19 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   )
 }
 
-export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel, teamId }: CreateLineupDialogProps) {
+export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel, teamId, currentLineup }: CreateLineupDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
   const [activePlayer, setActivePlayer] = useState<Player | null>(null)
+
+  // Load current lineup when dialog opens
+  useEffect(() => {
+    if (open && currentLineup) {
+      setLineup(currentLineup)
+    } else if (open && !currentLineup) {
+      setLineup({})
+    }
+  }, [open, currentLineup])
 
   // Filter players by selected team level and sort by name to maintain roster order
   const filteredPlayers = selectedTeamLevel 
