@@ -212,6 +212,11 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
 
+  // Filter players by selected team level and sort by name to maintain roster order
+  const filteredPlayers = selectedTeamLevel 
+    ? players.filter(player => player.team_level === selectedTeamLevel).sort((a, b) => a.name.localeCompare(b.name))
+    : players.sort((a, b) => a.name.localeCompare(b.name))
+
   // Load current lineup when dialog opens
   useEffect(() => {
     if (open) {
@@ -247,12 +252,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         setLineup(cleanedLineup)
       }
     }
-  }, [filteredPlayers, open])
-
-  // Filter players by selected team level and sort by name to maintain roster order
-  const filteredPlayers = selectedTeamLevel 
-    ? players.filter(player => player.team_level === selectedTeamLevel).sort((a, b) => a.name.localeCompare(b.name))
-    : players.sort((a, b) => a.name.localeCompare(b.name))
+  }, [filteredPlayers, open, lineup])
 
 
 
