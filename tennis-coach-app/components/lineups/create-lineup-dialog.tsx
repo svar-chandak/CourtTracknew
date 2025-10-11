@@ -124,8 +124,9 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
       .flatMap(posId => lineup[posId] || [])
   }
   
-  // Filter available players - exclude players in ANY lineup position
-  const allAssignedPlayers = Object.values(lineup).flat()
+  // Filter available players - exclude players in ANY lineup position (only those visible in this dialog)
+  const visiblePlayerIds = new Set(allPlayers.map(p => p.id))
+  const allAssignedPlayers = Object.values(lineup).flat().filter(id => visiblePlayerIds.has(id))
   let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
   
   // Add back players who are selected in THIS position (they should show as available to deselect)
@@ -155,7 +156,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
         <CardTitle className="text-sm flex items-center justify-between">
           <span>{position.name}</span>
           <Badge variant="outline" className="text-xs">
-            {selectedPlayers.length}/{position.maxPlayers}
+            {selectedPlayerObjects.length}/{position.maxPlayers}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -175,11 +176,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
                 />
               ))}
             </div>
-          ) : (
-            <div className="text-center py-4 text-gray-400 text-sm">
-              Drag players here or click to select
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* Available Players */}
@@ -193,7 +190,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
                   player={player}
                   isSelected={false}
                   onToggle={() => onPlayerToggle(position.id, player.id)}
-                  disabled={selectedPlayers.length >= position.maxPlayers}
+                  disabled={selectedPlayerObjects.length >= position.maxPlayers}
                   positionGender={position.gender as 'male' | 'female' | 'mixed'}
                 />
               ))}
