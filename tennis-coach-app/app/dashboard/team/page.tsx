@@ -205,7 +205,7 @@ export default function TeamPage() {
                                 <div>
                                   <h5 className="font-medium">{player.name}</h5>
                                   <p className="text-xs text-gray-500 font-mono">
-                                    ID: {player.player_id}
+                                    ID: {player.id}
                                   </p>
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
@@ -264,7 +264,7 @@ export default function TeamPage() {
                                 <div>
                                   <h5 className="font-medium">{player.name}</h5>
                                   <p className="text-xs text-gray-500 font-mono">
-                                    ID: {player.player_id}
+                                    ID: {player.id}
                                   </p>
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
