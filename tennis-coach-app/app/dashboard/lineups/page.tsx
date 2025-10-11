@@ -95,6 +95,12 @@ export default function LineupsPage() {
       const { position, player_ids } = lineup
       console.log('POSITION:', position, 'PLAYER_IDS:', player_ids)
       
+      // Skip if no player_ids or empty array
+      if (!player_ids || player_ids.length === 0) {
+        console.log('SKIPPING - NO PLAYERS:', position)
+        return
+      }
+      
       // Map database position names to dialog position IDs
       let positionId: string
       
@@ -131,11 +137,15 @@ export default function LineupsPage() {
         return // Skip unknown positions
       }
       
-      dialogLineup[positionId] = player_ids || []
-      console.log(`MAPPED: ${position} -> ${positionId} = ${player_ids}`)
+      // Only add if we have a valid positionId and player_ids
+      if (positionId && player_ids && player_ids.length > 0) {
+        dialogLineup[positionId] = player_ids
+        console.log(`MAPPED: ${position} -> ${positionId} = ${player_ids}`)
+      }
     })
     
     console.log('FINAL DIALOG LINEUP:', dialogLineup)
+    console.log('FINAL DIALOG LINEUP KEYS:', Object.keys(dialogLineup))
     return dialogLineup
   }
 

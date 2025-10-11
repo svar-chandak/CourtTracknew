@@ -216,12 +216,14 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     console.log('DIALOG OPENED:', open)
     console.log('CURRENT LINEUP:', currentLineup)
     
-    if (open && currentLineup) {
-      console.log('SETTING LINEUP:', currentLineup)
-      setLineup(currentLineup)
-    } else if (open && !currentLineup) {
-      console.log('NO LINEUP, SETTING EMPTY')
-      setLineup({})
+    if (open) {
+      if (currentLineup && Object.keys(currentLineup).length > 0) {
+        console.log('SETTING LINEUP:', currentLineup)
+        setLineup(currentLineup)
+      } else {
+        console.log('NO LINEUP, SETTING EMPTY')
+        setLineup({})
+      }
     }
   }, [open, currentLineup])
 
