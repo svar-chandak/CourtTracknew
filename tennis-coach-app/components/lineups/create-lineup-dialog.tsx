@@ -425,7 +425,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       toast.success('Lineup created successfully!')
       onLineupCreated?.(lineup)
       onOpenChange(false)
-      setLineup({})
     } catch (error) {
       console.error('Error creating lineup:', error)
       toast.error('Failed to save lineup. Please try again.')
@@ -538,20 +537,29 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         </DndContext>
 
         {/* Save Button */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
+        <div className="flex justify-between pt-4 border-t">
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => setLineup({})}
             disabled={isLoading}
           >
-            Cancel
+            Clear Lineup
           </Button>
-          <Button
-            onClick={onSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Saving...' : 'Save Lineup'}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={onSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Save Lineup'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
