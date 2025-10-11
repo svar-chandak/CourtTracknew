@@ -216,23 +216,38 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
   useEffect(() => {
     if (open) {
       if (currentLineup && Object.keys(currentLineup).length > 0) {
-        // Filter out any player IDs that don't exist in the current filtered players
-        const validPlayerIds = new Set(filteredPlayers.map(p => p.id))
-        const cleanedLineup: Record<string, string[]> = {}
-        
-        Object.entries(currentLineup).forEach(([positionId, playerIds]) => {
-          const validIds = playerIds.filter(id => validPlayerIds.has(id))
-          if (validIds.length > 0) {
-            cleanedLineup[positionId] = validIds
-          }
-        })
-        
-        setLineup(cleanedLineup)
+        setLineup(currentLineup)
       } else {
         setLineup({})
       }
     }
-  }, [open, currentLineup, filteredPlayers])
+  }, [open, currentLineup])
+
+  // Clean lineup when filteredPlayers changes (remove invalid player IDs)
+  useEffect(() => {
+    if (open && Object.keys(lineup).length > 0) {
+      const validPlayerIds = new Set(filteredPlayers.map(p => p.id))
+      const cleanedLineup: Record<string, string[]> = {}
+      
+      Object.entries(lineup).forEach(([positionId, playerIds]) => {
+        const validIds = playerIds.filter(id => validPlayerIds.has(id))
+        if (validIds.length > 0) {
+          cleanedLineup[positionId] = validIds
+        }
+      })
+      
+      // Only update if there's a change
+      const hasChanges = Object.keys(cleanedLineup).length !== Object.keys(lineup).length ||
+        Object.entries(cleanedLineup).some(([posId, ids]) => 
+          !lineup[posId] || lineup[posId].length !== ids.length || 
+          !ids.every(id => lineup[posId].includes(id))
+        )
+      
+      if (hasChanges) {
+        setLineup(cleanedLineup)
+      }
+    }
+  }, [filteredPlayers, open])
 
   // Filter players by selected team level and sort by name to maintain roster order
   const filteredPlayers = selectedTeamLevel 
