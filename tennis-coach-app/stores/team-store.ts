@@ -141,11 +141,11 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       console.log('Team ID:', teamId)
       set({ loading: true })
       
+      // Try a simpler query first
       const { data: players, error } = await supabase
         .from('players')
-        .select('*')
+        .select('id, name, team_id, gender, team_level')
         .eq('team_id', teamId)
-        .order('name')
 
       console.log('Players query result:', { players, error })
       console.log('Raw players data:', JSON.stringify(players, null, 2))
