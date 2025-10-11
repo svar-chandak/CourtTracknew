@@ -73,7 +73,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
     <div
       role="button"
       tabIndex={0}
-      className={`p-3 border rounded-lg cursor-pointer transition-all ${
+      className={`p-3 border rounded-lg cursor-pointer transition-all pointer-events-auto ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
           : canPlace 
@@ -252,8 +252,8 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       
       if (!position || !player) return prev
       
-      // Check gender validation
-      if (position.gender !== 'mixed' && position.gender !== player.gender) {
+      // Check gender validation (allow if player's gender is unknown)
+      if (position.gender !== 'mixed' && player.gender && position.gender !== player.gender) {
         toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
         return prev
       }
