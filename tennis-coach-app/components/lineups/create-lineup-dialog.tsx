@@ -70,17 +70,16 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
   const canPlace = !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender
   
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className={`p-3 border rounded-lg cursor-pointer transition-all pointer-events-auto ${
+    <button
+      type="button"
+      className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all pointer-events-auto ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
           : canPlace 
             ? 'bg-white border-gray-200 hover:border-gray-300'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={disabled || !canPlace ? undefined : onToggle}
+      onClick={disabled || !canPlace ? undefined : (e) => { e.stopPropagation(); onToggle(); }}
       onKeyDown={(e) => {
         if (disabled || !canPlace) return
         if (e.key === 'Enter' || e.key === ' ') {
@@ -103,7 +102,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
           <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 
