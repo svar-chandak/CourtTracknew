@@ -63,6 +63,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
   return (
     <button
       type="button"
+      style={{ pointerEvents: 'auto' }}
       className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
@@ -70,9 +71,8 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             ? 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
+      onClick={() => {
+        alert(`Clicked ${player.name}!`)
         console.log('Player clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
         if (!disabled && canPlace) {
           console.log('Calling onToggle for player:', player.name)
