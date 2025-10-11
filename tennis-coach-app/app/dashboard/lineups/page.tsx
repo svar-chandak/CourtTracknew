@@ -81,11 +81,17 @@ export default function LineupsPage() {
   const getDialogLineupFormat = (): Record<string, string[]> => {
     const dialogLineup: Record<string, string[]> = {}
     
+    if (lineups.length === 0) {
+      return dialogLineup
+    }
+    
     lineups.forEach(lineup => {
       const { position, player_ids } = lineup
       
       // Map database position names to dialog position IDs
       let positionId: string
+      
+      // Handle different possible position formats
       if (position.startsWith('boys_singles_')) {
         const order = position.split('_')[2]
         positionId = `${order}BS`
@@ -94,12 +100,25 @@ export default function LineupsPage() {
         positionId = `${order}GS`
       } else if (position.startsWith('boys_doubles_')) {
         const order = position.split('_')[2]
-        positionId = `${order}BD`
+        // Map roster order to position ID (7->1, 8->2)
+        const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
+        positionId = `${positionNumber}BD`
       } else if (position.startsWith('girls_doubles_')) {
         const order = position.split('_')[2]
-        positionId = `${order}GD`
+        // Map roster order to position ID (7->1, 8->2)
+        const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
+        positionId = `${positionNumber}GD`
       } else if (position === 'mixed_doubles_1') {
         positionId = 'MD'
+      } else if (position === '1GS' || position === '2GS' || position === '3GS' || position === '4GS' || position === '5GS' || position === '6GS') {
+        // Already in dialog format
+        positionId = position
+      } else if (position === '1BS' || position === '2BS' || position === '3BS' || position === '4BS' || position === '5BS' || position === '6BS') {
+        // Already in dialog format
+        positionId = position
+      } else if (position === '1GD' || position === '2GD' || position === '1BD' || position === '2BD' || position === 'MD') {
+        // Already in dialog format
+        positionId = position
       } else {
         return // Skip unknown positions
       }
@@ -128,10 +147,10 @@ export default function LineupsPage() {
           <h1 className="text-3xl font-bold">Lineups</h1>
           <p className="text-gray-600">Create and manage match lineups for your team</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Lineup
-        </Button>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Lineup
+            </Button>
       </div>
 
       {/* Stats Cards */}
