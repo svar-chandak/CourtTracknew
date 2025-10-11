@@ -9,15 +9,17 @@ import { Badge } from '@/components/ui/badge'
 import { AddPlayerDialog } from '@/components/team/add-player-dialog'
 import { EditPlayerDialog } from '@/components/team/edit-player-dialog'
 import { MassAddPlayersDialog } from '@/components/team/mass-add-players-dialog'
+import { MassEditPlayersDialog } from '@/components/team/mass-edit-players-dialog'
 import { Users, Plus, Edit, Trash2, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
 
 export default function TeamPage() {
   const { coach } = useAuthStore()
-  const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer } = useTeamStore()
+  const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer, bulkUpdatePlayers } = useTeamStore()
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showMassAddDialog, setShowMassAddDialog] = useState(false)
+  const [showMassEditDialog, setShowMassEditDialog] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
   useEffect(() => {
@@ -149,6 +151,12 @@ export default function TeamPage() {
               <Users className="h-4 w-4 mr-2" />
               Mass Add
             </Button>
+            {players.filter(p => !p.team_level).length > 0 && (
+              <Button onClick={() => setShowMassEditDialog(true)} variant="outline">
+                <Edit className="h-4 w-4 mr-2" />
+                Mass Edit
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -520,6 +528,19 @@ export default function TeamPage() {
           teamId={currentTeam.id}
           open={showMassAddDialog}
           onOpenChange={setShowMassAddDialog}
+        />
+      )}
+
+      {showMassEditDialog && (
+        <MassEditPlayersDialog
+          open={showMassEditDialog}
+          onOpenChange={setShowMassEditDialog}
+          players={players}
+          onPlayersUpdated={() => {
+            if (currentTeam) {
+              getPlayers(currentTeam.id)
+            }
+          }}
         />
       )}
 

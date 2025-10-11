@@ -346,4 +346,36 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       return { error: 'An unexpected error occurred' }
     }
   },
+
+  bulkUpdatePlayers: async (updates: Array<{ id: string; team_level?: string; gender?: string }>) => {
+    try {
+      const promises = updates.map(update => {
+        const { id, ...updateData } = update
+        return supabase
+          .from('players')
+          .update(updateData)
+          .eq('id', id)
+      })
+
+      const results = await Promise.all(promises)
+      
+      // Check for errors
+      const errors = results.filter(result => result.error)
+      if (errors.length > 0) {
+        console.error('Some updates failed:', errors)
+        return { error: 'Some players failed to update' }
+      }
+
+      // Refresh players list
+      const { currentTeam } = get()
+      if (currentTeam) {
+        getPlayers(currentTeam.id)
+      }
+
+      return { error: null }
+    } catch (error) {
+      console.error('Error in bulkUpdatePlayers:', error)
+      return { error: 'An unexpected error occurred' }
+    }
+  },
 }))
