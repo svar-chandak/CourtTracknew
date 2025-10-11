@@ -68,7 +68,7 @@ export function MassEditPlayersDialog({
 
     try {
       const updates = Array.from(selectedPlayers).map(playerId => {
-        const updateData: any = { id: playerId }
+        const updateData: { id: string; team_level?: string; gender?: string } = { id: playerId }
         if (bulkTeamLevel) updateData.team_level = bulkTeamLevel
         if (bulkGender) updateData.gender = bulkGender
         return updateData

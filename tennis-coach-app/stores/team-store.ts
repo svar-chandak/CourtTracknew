@@ -19,6 +19,7 @@ interface TeamState {
   addPlayer: (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => Promise<{ error: string | null }>
   updatePlayer: (playerId: string, updates: Partial<Player>) => Promise<{ error: string | null }>
   deletePlayer: (playerId: string) => Promise<{ error: string | null }>
+  bulkUpdatePlayers: (updates: Array<{ id: string; team_level?: string; gender?: string }>) => Promise<{ error: string | null }>
   
   // Match actions
   getMatches: (teamId: string) => Promise<void>

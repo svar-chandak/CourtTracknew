@@ -16,7 +16,7 @@ import type { Player } from '@/lib/types'
 
 export default function TeamPage() {
   const { coach } = useAuthStore()
-  const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer, bulkUpdatePlayers } = useTeamStore()
+  const { currentTeam, players, loading, getCurrentTeam, getPlayers, deletePlayer } = useTeamStore()
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showMassAddDialog, setShowMassAddDialog] = useState(false)
   const [showMassEditDialog, setShowMassEditDialog] = useState(false)
