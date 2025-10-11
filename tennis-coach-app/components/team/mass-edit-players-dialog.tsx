@@ -151,7 +151,7 @@ export function MassEditPlayersDialog({
                   disabled={selectedCount === 0 || (!bulkTeamLevel && !bulkGender) || isUpdating}
                   className="flex-1"
                 >
-                  {isUpdating ? 'Updating...' : `Update ${selectedCount} Selected Players`}
+                  {isUpdating ? 'Saving...' : `Save Changes (${selectedCount} Players)`}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -164,6 +164,14 @@ export function MassEditPlayersDialog({
                   Clear All
                 </Button>
               </div>
+              
+              {selectedCount > 0 && (
+                <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                  <strong>Ready to update {selectedCount} players:</strong>
+                  {bulkTeamLevel && <span className="ml-2">Team Level: {bulkTeamLevel}</span>}
+                  {bulkGender && <span className="ml-2">Gender: {bulkGender}</span>}
+                </div>
+              )}
             </CardContent>
           </Card>
 

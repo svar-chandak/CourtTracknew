@@ -154,7 +154,7 @@ export default function TeamPage() {
             {players.filter(p => !p.team_level).length > 0 && (
               <Button onClick={() => setShowMassEditDialog(true)} variant="outline">
                 <Edit className="h-4 w-4 mr-2" />
-                Mass Edit
+                Mass Edit ({players.filter(p => !p.team_level).length})
               </Button>
             )}
           </div>
