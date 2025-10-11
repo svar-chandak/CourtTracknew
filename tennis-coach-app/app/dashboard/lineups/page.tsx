@@ -18,28 +18,15 @@ export default function LineupsPage() {
   const [selectedTeamLevel, setSelectedTeamLevel] = useState<'varsity' | 'jv' | 'freshman' | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
-  console.log('=== LINEUPS PAGE RENDER ===')
-  console.log('Coach:', coach)
-  console.log('Current team:', currentTeam)
-  console.log('Players:', players)
-  console.log('Players length:', players.length)
-  console.log('Loading:', loading)
-  console.log('=== END LINEUPS PAGE RENDER ===')
 
   useEffect(() => {
-    console.log('=== COACH EFFECT ===')
-    console.log('Coach:', coach)
     if (coach?.id) {
-      console.log('Getting current team for coach:', coach.id)
       getCurrentTeam(coach.id)
     }
   }, [coach, getCurrentTeam])
 
   useEffect(() => {
-    console.log('=== TEAM EFFECT ===')
-    console.log('Current team:', currentTeam)
     if (currentTeam) {
-      console.log('Loading players and lineups for team:', currentTeam.id)
       getPlayers(currentTeam.id)
       loadLineups(currentTeam.id)
     }
@@ -77,10 +64,6 @@ export default function LineupsPage() {
   const getCurrentLineup = () => {
     const currentLineup: Record<string, Player[]> = {}
     
-    console.log('=== GET CURRENT LINEUP ===')
-    console.log('Lineups for display:', lineups)
-    console.log('Players:', players)
-    
     lineups.forEach(lineup => {
       const positionKey = lineup.position
       const lineupPlayers = lineup.player_ids
@@ -89,12 +72,9 @@ export default function LineupsPage() {
       
       if (lineupPlayers.length > 0) {
         currentLineup[positionKey] = lineupPlayers
-        console.log(`Added ${positionKey}:`, lineupPlayers.map(p => p.name))
       }
     })
     
-    console.log('Final current lineup:', currentLineup)
-    console.log('=== END GET CURRENT LINEUP ===')
     return currentLineup
   }
 
@@ -102,24 +82,15 @@ export default function LineupsPage() {
   const getDialogLineupFormat = (): Record<string, string[]> => {
     const dialogLineup: Record<string, string[]> = {}
     
-    // Simple debugging - just log the basic info
-    console.log('=== GET DIALOG LINEUP FORMAT ===')
-    console.log('LINEUPS:', lineups)
-    console.log('LINEUPS LENGTH:', lineups.length)
-    
     if (lineups.length === 0) {
-      console.log('NO LINEUPS FOUND - RETURNING EMPTY')
       return dialogLineup
     }
     
-    lineups.forEach((lineup, index) => {
-      console.log(`LINEUP ${index}:`, lineup)
+    lineups.forEach((lineup) => {
       const { position, player_ids } = lineup
-      console.log('POSITION:', position, 'PLAYER_IDS:', player_ids)
       
       // Skip if no player_ids or empty array
       if (!player_ids || player_ids.length === 0) {
-        console.log('SKIPPING - NO PLAYERS:', position)
         return
       }
       
@@ -155,19 +126,15 @@ export default function LineupsPage() {
         // Already in dialog format
         positionId = position
       } else {
-        console.log('UNKNOWN POSITION:', position)
         return // Skip unknown positions
       }
       
       // Only add if we have a valid positionId and player_ids
       if (positionId && player_ids && player_ids.length > 0) {
         dialogLineup[positionId] = player_ids
-        console.log(`MAPPED: ${position} -> ${positionId} = ${player_ids}`)
       }
     })
     
-    console.log('FINAL DIALOG LINEUP:', dialogLineup)
-    console.log('FINAL DIALOG LINEUP KEYS:', Object.keys(dialogLineup))
     return dialogLineup
   }
 
@@ -522,24 +489,11 @@ export default function LineupsPage() {
         onOpenChange={setShowCreateDialog}
         selectedTeamLevel={selectedTeamLevel || undefined}
         teamId={currentTeam?.id}
-        currentLineup={(() => {
-          const lineup = getDialogLineupFormat()
-          console.log('=== PASSING TO DIALOG ===')
-          console.log('DIALOG OPEN STATE:', showCreateDialog)
-          console.log('LINEUP BEING PASSED:', lineup)
-          console.log('=== END PASSING TO DIALOG ===')
-          return lineup
-        })()}
+        currentLineup={getDialogLineupFormat()}
         onLineupCreated={() => {
-          console.log('=== LINEUP CREATED CALLBACK ===')
-          console.log('Current team:', currentTeam)
           if (currentTeam) {
-            console.log('Loading lineups for team:', currentTeam.id)
-            loadLineups(currentTeam.id).then(() => {
-              console.log('Lineups reloaded successfully')
-            })
+            loadLineups(currentTeam.id)
           }
-          console.log('=== END LINEUP CREATED CALLBACK ===')
         }}
       />
     </div>

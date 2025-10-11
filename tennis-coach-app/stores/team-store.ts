@@ -137,8 +137,6 @@ export const useTeamStore = create<TeamState>((set, get) => ({
 
   getPlayers: async (teamId: string) => {
     try {
-      console.log('=== GET PLAYERS ===')
-      console.log('Team ID:', teamId)
       set({ loading: true })
       
       // Query with correct field names from database schema
@@ -147,20 +145,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         .select('id, name, team_id, grade, email, phone, position_preference, skill_level, created_at')
         .eq('team_id', teamId)
 
-      console.log('Players query result:', { players, error })
-      console.log('Raw players data:', JSON.stringify(players, null, 2))
-      console.log('Players type:', typeof players)
-      console.log('Players is array:', Array.isArray(players))
-
       if (error) {
         console.error('Error fetching players:', error)
         set({ players: [], loading: false })
         return
       }
 
-      console.log('Setting players:', players)
       set({ players: players || [], loading: false })
-      console.log('=== END GET PLAYERS ===')
     } catch (error) {
       console.error('Error in getPlayers:', error)
       set({ players: [], loading: false })
