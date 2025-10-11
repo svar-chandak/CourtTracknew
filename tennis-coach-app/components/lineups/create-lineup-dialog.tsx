@@ -79,7 +79,8 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             ? 'bg-white border-gray-200 hover:border-gray-300'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={disabled || !canPlace ? undefined : (e) => { e.stopPropagation(); onToggle(); }}
+      onPointerDown={disabled || !canPlace ? undefined : (e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
+      onClick={disabled || !canPlace ? undefined : (e) => { e.stopPropagation(); }}
       onKeyDown={(e) => {
         if (disabled || !canPlace) return
         if (e.key === 'Enter' || e.key === ' ') {
