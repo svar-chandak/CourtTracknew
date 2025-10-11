@@ -386,14 +386,14 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         const position = positions.find(p => p.id === positionId)
         if (!position) return null
 
-        // Map position types to database divisions
-        let division: string
+        // Map position types to database position names
+        let positionName: string
         if (position.type === 'singles') {
-          division = position.gender === 'male' ? 'boys_singles' : 'girls_singles'
+          positionName = position.gender === 'male' ? `boys_singles_${position.rosterOrder}` : `girls_singles_${position.rosterOrder}`
         } else if (position.type === 'doubles') {
-          division = position.gender === 'male' ? 'boys_doubles' : 'girls_doubles'
+          positionName = position.gender === 'male' ? `boys_doubles_${position.rosterOrder}` : `girls_doubles_${position.rosterOrder}`
         } else if (position.type === 'mixed') {
-          division = 'mixed_doubles'
+          positionName = 'mixed_doubles_1'
         } else {
           return null
         }
@@ -401,8 +401,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         return {
           team_id: teamId,
           match_id: null, // For now, we'll create general lineups without specific matches
-          division,
-          position_number: position.rosterOrder,
+          position: positionName,
           player_ids: playerIds
         }
       }).filter(Boolean)
