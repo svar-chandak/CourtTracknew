@@ -72,11 +72,12 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={() => {
-        alert(`Clicked ${player.name}!`)
         console.log('Player clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
         if (!disabled && canPlace) {
           console.log('Calling onToggle for player:', player.name)
           onToggle()
+        } else {
+          console.log('Click blocked - disabled:', disabled, 'canPlace:', canPlace)
         }
       }}
       onKeyDown={(e) => {
