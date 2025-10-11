@@ -73,7 +73,9 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
+        console.log('Player clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
         if (!disabled && canPlace) {
+          console.log('Calling onToggle for player:', player.name)
           onToggle()
         }
       }}
@@ -233,11 +235,13 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
+    console.log('handlePlayerToggle called:', positionId, playerId)
     setLineup(prev => {
       const current = prev[positionId] || []
       const position = positions.find(p => p.id === positionId)
       const player = filteredPlayers.find(p => p.id === playerId)
       
+      console.log('Position found:', position?.name, 'Player found:', player?.name)
       if (!position || !player) return prev
       
       // Check gender validation (allow if player's gender is unknown)
