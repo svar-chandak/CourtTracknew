@@ -126,16 +126,26 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   
   // Filter available players - exclude players in ANY lineup position
   const allAssignedPlayers = Object.values(lineup).flat()
-  let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
+  console.log(`=== AVAILABLE PLAYERS FOR ${position.id} ===`)
+  console.log('All assigned players:', allAssignedPlayers)
+  console.log('Players array:', players)
+  console.log('Players length:', players.length)
+  
+  let availablePlayers = players.filter(p => !allAssignedPlayers.includes(p.id))
+  console.log('Available players after filtering assigned:', availablePlayers)
   
   // Add back players who are selected in THIS position (they should show as available to deselect)
   const currentPositionPlayers = lineup[position.id] || []
-  availablePlayers = [...availablePlayers, ...currentPositionPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]]
+  console.log('Current position players:', currentPositionPlayers)
+  availablePlayers = [...availablePlayers, ...currentPositionPlayers.map(id => players.find(p => p.id === id)).filter(Boolean) as Player[]]
+  console.log('Available players after adding current position:', availablePlayers)
   
   // Remove duplicates
   availablePlayers = availablePlayers.filter((player, index, self) => 
     index === self.findIndex(p => p.id === player.id)
   )
+  console.log('Final available players:', availablePlayers)
+  console.log('=== END AVAILABLE PLAYERS ===')
   
   if (position.gender === 'female') {
     availablePlayers = availablePlayers.filter(p => p.gender === 'female')
@@ -213,8 +223,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
   // Load current lineup when dialog opens
   useEffect(() => {
+    console.log('=== DIALOG USEEFFECT ===')
     console.log('DIALOG OPENED:', open)
     console.log('CURRENT LINEUP:', currentLineup)
+    console.log('CURRENT LINEUP KEYS:', Object.keys(currentLineup || {}))
     
     if (open) {
       if (currentLineup && Object.keys(currentLineup).length > 0) {
@@ -224,7 +236,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         console.log('NO LINEUP, SETTING EMPTY')
         setLineup({})
       }
+    } else {
+      console.log('DIALOG NOT OPEN, NOT SETTING LINEUP')
     }
+    console.log('=== END DIALOG USEEFFECT ===')
   }, [open, currentLineup])
 
   // Filter players by selected team level and sort by name to maintain roster order
@@ -234,7 +249,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
   console.log('=== PLAYER DEBUGGING ===')
   console.log('All players:', players)
+  console.log('All players length:', players.length)
+  console.log('First player:', players[0])
   console.log('Filtered players:', filteredPlayers)
+  console.log('Filtered players length:', filteredPlayers.length)
   console.log('Selected team level:', selectedTeamLevel)
   console.log('=== END PLAYER DEBUGGING ===')
 
