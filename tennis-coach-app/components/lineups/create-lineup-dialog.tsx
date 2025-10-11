@@ -247,6 +247,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       
       console.log('Current lineup for position:', current)
       console.log('Position max players:', position.maxPlayers)
+      console.log('Current players in position:', current.map(id => filteredPlayers.find(p => p.id === id)?.name))
       
       // Check gender validation (allow if player's gender is unknown)
       if (position.gender !== 'mixed' && player.gender && position.gender !== player.gender) {
