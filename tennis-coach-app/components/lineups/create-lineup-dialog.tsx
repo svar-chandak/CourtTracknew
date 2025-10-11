@@ -2,15 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -72,15 +63,20 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
   return (
     <button
       type="button"
-      className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all pointer-events-auto ${
+      className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
           : canPlace 
-            ? 'bg-white border-gray-200 hover:border-gray-300'
+            ? 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onPointerDown={disabled || !canPlace ? undefined : (e) => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
-      onClick={disabled || !canPlace ? undefined : (e) => { e.stopPropagation(); }}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (!disabled && canPlace) {
+          onToggle()
+        }
+      }}
       onKeyDown={(e) => {
         if (disabled || !canPlace) return
         if (e.key === 'Enter' || e.key === ' ') {
@@ -216,7 +212,6 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
 export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel, teamId, currentLineup }: CreateLineupDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
-  const [activePlayer, setActivePlayer] = useState<Player | null>(null)
 
   // Load current lineup when dialog opens
   useEffect(() => {
@@ -235,13 +230,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     : players.sort((a, b) => a.name.localeCompare(b.name))
 
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  )
 
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
@@ -321,78 +309,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     })
   }
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const playerId = event.active.id as string
-    const player = filteredPlayers.find(p => p.id === playerId)
-    setActivePlayer(player || null)
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    setActivePlayer(null)
-
-    if (!over) return
-
-    const playerId = active.id as string
-    const positionId = over.id as string
-    const player = filteredPlayers.find(p => p.id === playerId)
-    const position = positions.find(p => p.id === positionId)
-
-    if (!player || !position) return
-
-    // Check gender validation - prevent dropping wrong gender
-    if (position.gender !== 'mixed' && position.gender !== player.gender) {
-      toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
-      return
-    }
-
-    // Check if player is already in this position
-    const currentPositionPlayers = lineup[positionId] || []
-    if (currentPositionPlayers.includes(playerId)) return
-
-    // Check if position can accommodate more players
-    if (currentPositionPlayers.length >= position.maxPlayers) return
-
-    // For mixed doubles, check gender requirements
-    if (position.gender === 'mixed') {
-      const currentPlayers = currentPositionPlayers.map(id => filteredPlayers.find(p => p.id === id)).filter(Boolean) as Player[]
-      const hasMale = currentPlayers.some(p => p.gender === 'male')
-      const hasFemale = currentPlayers.some(p => p.gender === 'female')
-      
-      if (currentPositionPlayers.length === 1) {
-        if ((hasMale && player.gender === 'male') || (hasFemale && player.gender === 'female')) {
-          toast.error('Mixed doubles needs one boy and one girl')
-          return
-        }
-      }
-    }
-
-    // Remove player from conflicting positions
-    const newLineup = { ...lineup }
-    
-    // Determine which positions conflict with this one
-    let conflictingPositions: string[] = []
-    
-    if (position.type === 'singles') {
-      // For singles: remove from other singles positions
-      const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
-      conflictingPositions = singlesPositions.filter(posId => posId !== positionId)
-    } else if (position.type === 'doubles' || position.type === 'mixed') {
-      // For any doubles position: remove from other doubles positions (regular or mixed)
-      const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
-      conflictingPositions = doublesPositions.filter(posId => posId !== positionId)
-    }
-    
-    // Remove player from conflicting positions
-    conflictingPositions.forEach(posId => {
-      newLineup[posId] = (newLineup[posId] || []).filter(id => id !== playerId)
-    })
-
-    // Add player to new position
-    newLineup[positionId] = [...(newLineup[positionId] || []), playerId]
-
-    setLineup(newLineup)
-  }
 
   const onSubmit = async () => {
     if (!teamId) {
@@ -464,16 +380,11 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
             Create Match Lineup
           </DialogTitle>
           <DialogDescription>
-            Drag and drop players to positions or click to select. Singles positions need 1 player, doubles need 2.
+            Click on players to assign them to positions. Singles positions need 1 player, doubles need 2.
           </DialogDescription>
         </DialogHeader>
         
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="space-y-6">
+        <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {positions.map((position) => (
                 <div key={position.id} id={position.id}>
@@ -543,20 +454,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
             </Card>
 
           </div>
-
-          <DragOverlay>
-            {activePlayer ? (
-              <div className="p-3 bg-white border rounded-lg shadow-lg">
-                <div className="font-medium text-sm">{activePlayer.name}</div>
-                <div className="text-xs text-gray-500">
-                  {activePlayer.grade && `Grade ${activePlayer.grade}`}
-                  {activePlayer.team_level && ` • ${activePlayer.team_level === 'varsity' ? 'Varsity' : activePlayer.team_level === 'jv' ? 'JV' : 'Freshman'}`}
-                  {activePlayer.utr_rating && ` • UTR ${activePlayer.utr_rating}`}
-                </div>
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
 
         {/* Save Button */}
         <div className="flex justify-between pt-4 border-t">
