@@ -72,12 +72,8 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={() => {
-        console.log('Player clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
         if (!disabled && canPlace) {
-          console.log('Calling onToggle for player:', player.name)
           onToggle()
-        } else {
-          console.log('Click blocked - disabled:', disabled, 'canPlace:', canPlace)
         }
       }}
       onKeyDown={(e) => {
@@ -220,12 +216,23 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
   useEffect(() => {
     if (open) {
       if (currentLineup && Object.keys(currentLineup).length > 0) {
-        setLineup(currentLineup)
+        // Filter out any player IDs that don't exist in the current filtered players
+        const validPlayerIds = new Set(filteredPlayers.map(p => p.id))
+        const cleanedLineup: Record<string, string[]> = {}
+        
+        Object.entries(currentLineup).forEach(([positionId, playerIds]) => {
+          const validIds = playerIds.filter(id => validPlayerIds.has(id))
+          if (validIds.length > 0) {
+            cleanedLineup[positionId] = validIds
+          }
+        })
+        
+        setLineup(cleanedLineup)
       } else {
         setLineup({})
       }
     }
-  }, [open, currentLineup])
+  }, [open, currentLineup, filteredPlayers])
 
   // Filter players by selected team level and sort by name to maintain roster order
   const filteredPlayers = selectedTeamLevel 
@@ -236,22 +243,15 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
-    console.log('handlePlayerToggle called:', positionId, playerId)
     setLineup(prev => {
       const current = prev[positionId] || []
       const position = positions.find(p => p.id === positionId)
       const player = filteredPlayers.find(p => p.id === playerId)
       
-      console.log('Position found:', position?.name, 'Player found:', player?.name)
       if (!position || !player) return prev
-      
-      console.log('Current lineup for position:', current)
-      console.log('Position max players:', position.maxPlayers)
-      console.log('Current players in position:', current.map(id => filteredPlayers.find(p => p.id === id)?.name))
       
       // Check gender validation (allow if player's gender is unknown)
       if (position.gender !== 'mixed' && player.gender && position.gender !== player.gender) {
-        console.log('Gender validation failed')
         toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
         return prev
       }
@@ -283,13 +283,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           }
         }
       } else {
-        console.log('Processing regular position (not mixed)')
         if (current.includes(playerId)) {
-          console.log('Player already in position, removing')
           // Remove player
           return { ...prev, [positionId]: current.filter(id => id !== playerId) }
         } else if (current.length < position.maxPlayers) {
-          console.log('Adding player to position')
           // Add player and remove from conflicting positions
           const newLineup = { ...prev }
           
@@ -314,14 +311,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           // Add player to current position
           newLineup[positionId] = [...current, playerId]
           
-          console.log('New lineup after adding player:', newLineup)
           return newLineup
-        } else {
-          console.log('Position is full, cannot add player')
         }
       }
       
-      console.log('Returning previous lineup unchanged')
       return prev
     })
   }
