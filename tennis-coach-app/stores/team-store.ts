@@ -370,7 +370,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       // Refresh players list
       const { currentTeam } = get()
       if (currentTeam) {
-        getPlayers(currentTeam.id)
+        get().getPlayers(currentTeam.id)
       }
 
       return { error: null }
