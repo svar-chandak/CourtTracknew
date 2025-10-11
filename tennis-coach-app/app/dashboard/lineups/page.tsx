@@ -317,9 +317,7 @@ export default function LineupsPage() {
                             }`}>
                               <div className="flex-1">
                                 <div className="text-sm font-medium">{num}st Boys Singles</div>
-                                {isEmpty ? (
-                                  <div className="text-xs text-gray-500">Drag player here</div>
-                                ) : (
+                                {!isEmpty && (
                                   <div className="text-xs text-green-600 font-medium">
                                     {assignedPlayers.map(p => p.name).join(', ')}
                                   </div>
@@ -348,9 +346,7 @@ export default function LineupsPage() {
                             }`}>
                               <div className="flex-1">
                                 <div className="text-sm font-medium">{num}st Boys Doubles</div>
-                                {isEmpty ? (
-                                  <div className="text-xs text-gray-500">Drag 2 players here</div>
-                                ) : (
+                                {!isEmpty && (
                                   <div className="text-xs text-green-600 font-medium">
                                     {assignedPlayers.map(p => p.name).join(', ')}
                                   </div>
@@ -384,9 +380,7 @@ export default function LineupsPage() {
                             }`}>
                               <div className="flex-1">
                                 <div className="text-sm font-medium">{num}st Girls Singles</div>
-                                {isEmpty ? (
-                                  <div className="text-xs text-gray-500">Drag player here</div>
-                                ) : (
+                                {!isEmpty && (
                                   <div className="text-xs text-green-600 font-medium">
                                     {assignedPlayers.map(p => p.name).join(', ')}
                                   </div>
@@ -415,9 +409,7 @@ export default function LineupsPage() {
                             }`}>
                               <div className="flex-1">
                                 <div className="text-sm font-medium">{num}st Girls Doubles</div>
-                                {isEmpty ? (
-                                  <div className="text-xs text-gray-500">Drag 2 players here</div>
-                                ) : (
+                                {!isEmpty && (
                                   <div className="text-xs text-green-600 font-medium">
                                     {assignedPlayers.map(p => p.name).join(', ')}
                                   </div>
@@ -441,9 +433,7 @@ export default function LineupsPage() {
                   }`}>
                     <div className="flex-1">
                       <div className="text-sm font-medium">Mixed Doubles</div>
-                      {!currentLineup['mixed_doubles_1'] || currentLineup['mixed_doubles_1'].length === 0 ? (
-                        <div className="text-xs text-gray-500">Drag 1 boy + 1 girl here</div>
-                      ) : (
+                      {currentLineup['mixed_doubles_1'] && currentLineup['mixed_doubles_1'].length > 0 && (
                         <div className="text-xs text-green-600 font-medium">
                           {currentLineup['mixed_doubles_1'].map(p => p.name).join(', ')}
                         </div>
@@ -455,9 +445,6 @@ export default function LineupsPage() {
 
               {/* Actions */}
               <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline">
-                  Save as Template
-                </Button>
                 <Button onClick={() => setShowCreateDialog(true)}>
                   Create Lineup
                 </Button>
