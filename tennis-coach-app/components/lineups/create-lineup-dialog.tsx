@@ -213,19 +213,16 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
   // Load current lineup when dialog opens
   useEffect(() => {
-    console.log('=== DIALOG DEBUGGING ===')
-    console.log('Dialog opened:', open)
-    console.log('Current lineup passed to dialog:', currentLineup)
-    console.log('Current lineup keys:', Object.keys(currentLineup || {}))
+    console.log('DIALOG OPENED:', open)
+    console.log('CURRENT LINEUP:', currentLineup)
     
     if (open && currentLineup) {
-      console.log('Setting lineup in dialog:', currentLineup)
+      console.log('SETTING LINEUP:', currentLineup)
       setLineup(currentLineup)
     } else if (open && !currentLineup) {
-      console.log('No current lineup, setting empty')
+      console.log('NO LINEUP, SETTING EMPTY')
       setLineup({})
     }
-    console.log('=== END DIALOG DEBUGGING ===')
   }, [open, currentLineup])
 
   // Filter players by selected team level and sort by name to maintain roster order
