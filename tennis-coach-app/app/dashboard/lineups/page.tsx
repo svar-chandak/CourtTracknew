@@ -197,6 +197,11 @@ export default function LineupsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {players
                     .filter(player => player.team_level === selectedTeamLevel)
+                    .filter(player => {
+                      // Filter out players who are already assigned to any lineup position
+                      const assignedPlayerIds = lineups.flatMap(lineup => lineup.player_ids || [])
+                      return !assignedPlayerIds.includes(player.id)
+                    })
                     .map((player) => (
                       <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow cursor-move">
                         <div className="text-sm font-medium">{player.name}</div>
@@ -212,10 +217,15 @@ export default function LineupsPage() {
                         )}
                       </div>
                     ))}
-                  {players.filter(player => player.team_level === selectedTeamLevel).length === 0 && (
+                  {players
+                    .filter(player => player.team_level === selectedTeamLevel)
+                    .filter(player => {
+                      const assignedPlayerIds = lineups.flatMap(lineup => lineup.player_ids || [])
+                      return !assignedPlayerIds.includes(player.id)
+                    }).length === 0 && (
                     <div className="col-span-full text-center py-8 text-gray-500">
                       <p>No {selectedTeamLevel} players available</p>
-                      <p className="text-sm">Add players to your team first</p>
+                      <p className="text-sm">All players are assigned to lineup positions</p>
                     </div>
                   )}
                 </div>
