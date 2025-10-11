@@ -245,8 +245,12 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       console.log('Position found:', position?.name, 'Player found:', player?.name)
       if (!position || !player) return prev
       
+      console.log('Current lineup for position:', current)
+      console.log('Position max players:', position.maxPlayers)
+      
       // Check gender validation (allow if player's gender is unknown)
       if (position.gender !== 'mixed' && player.gender && position.gender !== player.gender) {
+        console.log('Gender validation failed')
         toast.error(`${position.name} is for ${position.gender === 'female' ? 'girls' : 'boys'} only`)
         return prev
       }
@@ -278,10 +282,13 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           }
         }
       } else {
+        console.log('Processing regular position (not mixed)')
         if (current.includes(playerId)) {
+          console.log('Player already in position, removing')
           // Remove player
           return { ...prev, [positionId]: current.filter(id => id !== playerId) }
         } else if (current.length < position.maxPlayers) {
+          console.log('Adding player to position')
           // Add player and remove from conflicting positions
           const newLineup = { ...prev }
           
@@ -306,10 +313,14 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           // Add player to current position
           newLineup[positionId] = [...current, playerId]
           
+          console.log('New lineup after adding player:', newLineup)
           return newLineup
+        } else {
+          console.log('Position is full, cannot add player')
         }
       }
       
+      console.log('Returning previous lineup unchanged')
       return prev
     })
   }
