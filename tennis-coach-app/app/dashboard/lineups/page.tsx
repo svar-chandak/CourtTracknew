@@ -64,7 +64,7 @@ export default function LineupsPage() {
     const currentLineup: Record<string, Player[]> = {}
     
     lineups.forEach(lineup => {
-      const positionKey = lineup.position
+      const positionKey = `${lineup.division}_${lineup.position_number}`
       const lineupPlayers = lineup.player_ids
         .map(id => players.find(p => p.id === id))
         .filter(Boolean) as Player[]
