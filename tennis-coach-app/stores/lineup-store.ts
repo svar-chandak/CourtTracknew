@@ -24,10 +24,7 @@ export const useLineupStore = create<LineupState>((set, get) => ({
     try {
       const { data, error } = await supabase
         .from('lineups')
-        .select(`
-          *,
-          players:player_ids
-        `)
+        .select('*')
         .eq('team_id', teamId)
         .order('created_at', { ascending: false })
 

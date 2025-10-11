@@ -120,9 +120,8 @@ export interface MatchResult {
 export interface Lineup {
   id: string
   team_id: string
-  match_id: string
-  division: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
-  position_number: number
+  match_id: string | null
+  position: string
   player_ids: string[]
   created_at: string
   players?: Player[]
