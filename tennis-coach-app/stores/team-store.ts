@@ -140,10 +140,10 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ loading: true })
       
-      // Query with only basic fields that definitely exist
+      // Query with all available fields
       const { data: players, error } = await supabase
         .from('players')
-        .select('id, name, team_id, created_at')
+        .select('id, name, team_id, created_at, gender, team_level')
         .eq('team_id', teamId)
 
       if (error) {
@@ -350,8 +350,11 @@ export const useTeamStore = create<TeamState>((set, get) => ({
 
   bulkUpdatePlayers: async (updates: Array<{ id: string; team_level?: string; gender?: string }>) => {
     try {
+      console.log('bulkUpdatePlayers called with:', updates)
+      
       const promises = updates.map(update => {
         const { id, ...updateData } = update
+        console.log(`Updating player ${id} with:`, updateData)
         return supabase
           .from('players')
           .update(updateData)
@@ -359,6 +362,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       })
 
       const results = await Promise.all(promises)
+      console.log('Database update results:', results)
       
       // Check for errors
       const errors = results.filter(result => result.error)

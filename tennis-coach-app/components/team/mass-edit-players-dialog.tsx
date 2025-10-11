@@ -74,7 +74,9 @@ export function MassEditPlayersDialog({
         return updateData
       })
 
+      console.log('Mass edit updates:', updates)
       const { error } = await bulkUpdatePlayers(updates)
+      console.log('Bulk update result:', { error })
       
       if (error) {
         toast.error(error)
