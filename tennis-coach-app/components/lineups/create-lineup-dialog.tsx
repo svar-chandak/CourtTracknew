@@ -20,6 +20,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { GripVertical, Users, Trophy } from 'lucide-react'
 import type { Player } from '@/lib/types'
@@ -487,6 +488,23 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        {/* Save Button */}
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={onSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Saving...' : 'Save Lineup'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )
