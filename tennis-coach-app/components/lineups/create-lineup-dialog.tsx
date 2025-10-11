@@ -123,6 +123,30 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
       .flatMap(posId => lineup[posId] || [])
   }
   
+  // Filter available players - exclude players in ANY lineup position
+  const allAssignedPlayers = Object.values(lineup).flat()
+  let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
+  
+  // Add back players who are selected in THIS position (they should show as available to deselect)
+  const currentPositionPlayers = lineup[position.id] || []
+  availablePlayers = [...availablePlayers, ...currentPositionPlayers.map(id => allPlayers.find(p => p.id === id)).filter(Boolean) as Player[]]
+  
+  // Remove duplicates
+  availablePlayers = availablePlayers.filter((player, index, self) => 
+    index === self.findIndex(p => p.id === player.id)
+  )
+  
+  if (position.gender === 'female') {
+    availablePlayers = availablePlayers.filter(p => p.gender === 'female')
+  } else if (position.gender === 'male') {
+    availablePlayers = availablePlayers.filter(p => p.gender === 'male')
+  } else if (position.gender === 'mixed') {
+    // For mixed doubles, show all players but we'll validate in the toggle function
+    availablePlayers = availablePlayers
+  }
+
+  // Sort players by name to maintain consistent roster order
+  availablePlayers = availablePlayers.sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <Card className="min-h-[200px]">
@@ -156,6 +180,25 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
             </div>
           )}
         </div>
+
+        {/* Available Players */}
+        {availablePlayers.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs text-gray-600">Available Players</Label>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {availablePlayers.map((player) => (
+                <DraggablePlayer
+                  key={player.id}
+                  player={player}
+                  isSelected={false}
+                  onToggle={() => onPlayerToggle(position.id, player.id)}
+                  disabled={selectedPlayers.length >= position.maxPlayers}
+                  positionGender={position.gender as 'male' | 'female' | 'mixed'}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
       </CardContent>
     </Card>
