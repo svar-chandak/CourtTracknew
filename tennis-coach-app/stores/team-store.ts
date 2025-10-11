@@ -137,6 +137,8 @@ export const useTeamStore = create<TeamState>((set, get) => ({
 
   getPlayers: async (teamId: string) => {
     try {
+      console.log('=== GET PLAYERS ===')
+      console.log('Team ID:', teamId)
       set({ loading: true })
       
       const { data: players, error } = await supabase
@@ -145,13 +147,17 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         .eq('team_id', teamId)
         .order('name')
 
+      console.log('Players query result:', { players, error })
+
       if (error) {
         console.error('Error fetching players:', error)
         set({ players: [], loading: false })
         return
       }
 
+      console.log('Setting players:', players)
       set({ players: players || [], loading: false })
+      console.log('=== END GET PLAYERS ===')
     } catch (error) {
       console.error('Error in getPlayers:', error)
       set({ players: [], loading: false })

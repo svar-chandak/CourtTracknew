@@ -18,14 +18,28 @@ export default function LineupsPage() {
   const [selectedTeamLevel, setSelectedTeamLevel] = useState<'varsity' | 'jv' | 'freshman' | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
+  console.log('=== LINEUPS PAGE RENDER ===')
+  console.log('Coach:', coach)
+  console.log('Current team:', currentTeam)
+  console.log('Players:', players)
+  console.log('Players length:', players.length)
+  console.log('Loading:', loading)
+  console.log('=== END LINEUPS PAGE RENDER ===')
+
   useEffect(() => {
+    console.log('=== COACH EFFECT ===')
+    console.log('Coach:', coach)
     if (coach?.id) {
+      console.log('Getting current team for coach:', coach.id)
       getCurrentTeam(coach.id)
     }
   }, [coach, getCurrentTeam])
 
   useEffect(() => {
+    console.log('=== TEAM EFFECT ===')
+    console.log('Current team:', currentTeam)
     if (currentTeam) {
+      console.log('Loading players and lineups for team:', currentTeam.id)
       getPlayers(currentTeam.id)
       loadLineups(currentTeam.id)
     }
