@@ -440,6 +440,60 @@ export default function TeamPage() {
                 </div>
               )}
 
+              {/* Show all unassigned players regardless of gender */}
+              {players.filter(p => !p.team_level).length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-gray-100 text-gray-700">
+                      All Unassigned Players
+                    </Badge>
+                    <span className="text-sm text-gray-600">
+                      {players.filter(p => !p.team_level).length} player{players.filter(p => !p.team_level).length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {players.filter(p => !p.team_level).map((player) => (
+                      <div key={player.id} className="border rounded-lg p-3 hover:shadow-md transition-shadow bg-gray-50">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h5 className="font-medium">{player.name}</h5>
+                            <p className="text-xs text-gray-500 font-mono">
+                              ID: {player.id}
+                            </p>
+                          </div>
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setEditingPlayer(player)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeletePlayer(player.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="destructive" className="text-xs">
+                            No Team Level
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            No Gender
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Show message if no players have team levels assigned */}
               {players.length > 0 && players.every(p => !p.team_level) && (
                 <div className="text-center py-8 text-gray-500">
