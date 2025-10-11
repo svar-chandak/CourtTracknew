@@ -25,18 +25,20 @@ export interface Team {
 export interface Player {
   id: string
   team_id: string
-  player_id: string // Student login ID
   name: string
-  email?: string // Student login email
-  password_hash?: string // Student login password
-  gender: 'male' | 'female'
+  email?: string
   grade?: number
-  position_preference?: 'boys_singles' | 'girls_singles' | 'boys_doubles' | 'girls_doubles' | 'mixed_doubles'
-  team_level?: 'varsity' | 'jv' | 'freshman'
-  utr_rating?: number
   phone?: string
+  position_preference?: string
+  skill_level?: string
   created_at: string
   team?: Team
+  // Additional fields for UI (not in database)
+  gender?: 'male' | 'female'
+  team_level?: 'varsity' | 'jv' | 'freshman'
+  player_id?: string
+  password_hash?: string
+  utr_rating?: number
 }
 
 export interface Match {

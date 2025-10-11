@@ -141,10 +141,10 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       console.log('Team ID:', teamId)
       set({ loading: true })
       
-      // Try a simpler query first
+      // Query with correct field names from database schema
       const { data: players, error } = await supabase
         .from('players')
-        .select('id, name, team_id, gender, team_level')
+        .select('id, name, team_id, grade, email, phone, position_preference, skill_level, created_at')
         .eq('team_id', teamId)
 
       console.log('Players query result:', { players, error })
