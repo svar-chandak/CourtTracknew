@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { GripVertical, Users, Trophy } from 'lucide-react'
 import type { Player } from '@/lib/types'
+import { supabase } from '@/lib/supabase'
 
 interface CreateLineupDialogProps {
   players: Player[]
@@ -31,6 +32,7 @@ interface CreateLineupDialogProps {
   onOpenChange: (open: boolean) => void
   onLineupCreated?: (lineup: Record<string, string[]>) => void
   selectedTeamLevel?: 'varsity' | 'jv' | 'freshman'
+  teamId?: string
 }
 
 const positions = [
@@ -201,7 +203,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   )
 }
 
-export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel }: CreateLineupDialogProps) {
+export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel, teamId }: CreateLineupDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
   const [activePlayer, setActivePlayer] = useState<Player | null>(null)
@@ -371,16 +373,59 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
   }
 
   const onSubmit = async () => {
+    if (!teamId) {
+      toast.error('Team ID is required to save lineup')
+      return
+    }
+
     setIsLoading(true)
     
     try {
-      console.log('Creating lineup:', lineup)
+      // Convert the lineup format to database format
+      const lineupEntries = Object.entries(lineup).map(([positionId, playerIds]) => {
+        const position = positions.find(p => p.id === positionId)
+        if (!position) return null
+
+        // Map position types to database divisions
+        let division: string
+        if (position.type === 'singles') {
+          division = position.gender === 'male' ? 'boys_singles' : 'girls_singles'
+        } else if (position.type === 'doubles') {
+          division = position.gender === 'male' ? 'boys_doubles' : 'girls_doubles'
+        } else if (position.type === 'mixed') {
+          division = 'mixed_doubles'
+        } else {
+          return null
+        }
+
+        return {
+          team_id: teamId,
+          match_id: null, // For now, we'll create general lineups without specific matches
+          division,
+          position_number: position.rosterOrder,
+          player_ids: playerIds
+        }
+      }).filter(Boolean)
+
+      if (lineupEntries.length === 0) {
+        toast.error('No valid lineup positions to save')
+        return
+      }
+
+      // Save to database
+      const { error } = await supabase
+        .from('lineups')
+        .insert(lineupEntries)
+
+      if (error) throw error
+
       toast.success('Lineup created successfully!')
       onLineupCreated?.(lineup)
       onOpenChange(false)
       setLineup({})
     } catch (error) {
-      toast.error('An unexpected error occurred')
+      console.error('Error creating lineup:', error)
+      toast.error('Failed to save lineup. Please try again.')
     } finally {
       setIsLoading(false)
     }

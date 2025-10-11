@@ -3,15 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTeamStore } from '@/stores/team-store'
+import { useLineupStore } from '@/stores/lineup-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Gamepad2, Plus, Users, Trophy } from 'lucide-react'
 import { CreateLineupDialog } from '@/components/lineups/create-lineup-dialog'
+import type { Player } from '@/lib/types'
 
 export default function LineupsPage() {
   const { coach } = useAuthStore()
   const { currentTeam, players, loading, getCurrentTeam, getPlayers } = useTeamStore()
+  const { lineups, loadLineups } = useLineupStore()
   const [selectedTeamLevel, setSelectedTeamLevel] = useState<'varsity' | 'jv' | 'freshman' | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
@@ -24,8 +27,9 @@ export default function LineupsPage() {
   useEffect(() => {
     if (currentTeam) {
       getPlayers(currentTeam.id)
+      loadLineups(currentTeam.id)
     }
-  }, [currentTeam, getPlayers])
+  }, [currentTeam, getPlayers, loadLineups])
 
   // Auto-select team level if only one has players
   useEffect(() => {
@@ -54,6 +58,26 @@ export default function LineupsPage() {
   }
 
   const stats = getTeamLevelStats()
+
+  // Get current lineup for display
+  const getCurrentLineup = () => {
+    const currentLineup: Record<string, Player[]> = {}
+    
+    lineups.forEach(lineup => {
+      const positionKey = `${lineup.division}_${lineup.position_number}`
+      const lineupPlayers = lineup.player_ids
+        .map(id => players.find(p => p.id === id))
+        .filter(Boolean) as Player[]
+      
+      if (lineupPlayers.length > 0) {
+        currentLineup[positionKey] = lineupPlayers
+      }
+    })
+    
+    return currentLineup
+  }
+
+  const currentLineup = getCurrentLineup()
 
   if (loading) {
     return (
@@ -209,14 +233,30 @@ export default function LineupsPage() {
                     <div>
                       <h5 className="font-medium mb-2 text-sm">Boys Singles</h5>
                       <div className="space-y-2">
-                        {[1, 2, 3].map((num) => (
-                          <div key={`boys_singles_${num}`} className="border-2 border-dashed border-blue-200 rounded-lg p-3 min-h-[60px] flex items-center bg-blue-50">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium">{num}st Boys Singles</div>
-                              <div className="text-xs text-gray-500">Drag player here</div>
+                        {[1, 2, 3].map((num) => {
+                          const positionKey = `boys_singles_${num}`
+                          const assignedPlayers = currentLineup[positionKey] || []
+                          const isEmpty = assignedPlayers.length === 0
+                          
+                          return (
+                            <div key={`boys_singles_${num}`} className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
+                              isEmpty 
+                                ? 'border-dashed border-blue-200 bg-blue-50' 
+                                : 'border-solid border-blue-300 bg-blue-100'
+                            }`}>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium">{num}st Boys Singles</div>
+                                {isEmpty ? (
+                                  <div className="text-xs text-gray-500">Drag player here</div>
+                                ) : (
+                                  <div className="text-xs text-green-600 font-medium">
+                                    {assignedPlayers.map(p => p.name).join(', ')}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
 
@@ -224,14 +264,30 @@ export default function LineupsPage() {
                     <div>
                       <h5 className="font-medium mb-2 text-sm">Boys Doubles</h5>
                       <div className="space-y-2">
-                        {[1, 2].map((num) => (
-                          <div key={`boys_doubles_${num}`} className="border-2 border-dashed border-blue-200 rounded-lg p-3 min-h-[60px] flex items-center bg-blue-50">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium">{num}st Boys Doubles</div>
-                              <div className="text-xs text-gray-500">Drag 2 players here</div>
+                        {[1, 2].map((num) => {
+                          const positionKey = `boys_doubles_${num}`
+                          const assignedPlayers = currentLineup[positionKey] || []
+                          const isEmpty = assignedPlayers.length === 0
+                          
+                          return (
+                            <div key={`boys_doubles_${num}`} className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
+                              isEmpty 
+                                ? 'border-dashed border-blue-200 bg-blue-50' 
+                                : 'border-solid border-blue-300 bg-blue-100'
+                            }`}>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium">{num}st Boys Doubles</div>
+                                {isEmpty ? (
+                                  <div className="text-xs text-gray-500">Drag 2 players here</div>
+                                ) : (
+                                  <div className="text-xs text-green-600 font-medium">
+                                    {assignedPlayers.map(p => p.name).join(', ')}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
@@ -244,14 +300,30 @@ export default function LineupsPage() {
                     <div>
                       <h5 className="font-medium mb-2 text-sm">Girls Singles</h5>
                       <div className="space-y-2">
-                        {[1, 2, 3].map((num) => (
-                          <div key={`girls_singles_${num}`} className="border-2 border-dashed border-pink-200 rounded-lg p-3 min-h-[60px] flex items-center bg-pink-50">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium">{num}st Girls Singles</div>
-                              <div className="text-xs text-gray-500">Drag player here</div>
+                        {[1, 2, 3].map((num) => {
+                          const positionKey = `girls_singles_${num}`
+                          const assignedPlayers = currentLineup[positionKey] || []
+                          const isEmpty = assignedPlayers.length === 0
+                          
+                          return (
+                            <div key={`girls_singles_${num}`} className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
+                              isEmpty 
+                                ? 'border-dashed border-pink-200 bg-pink-50' 
+                                : 'border-solid border-pink-300 bg-pink-100'
+                            }`}>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium">{num}st Girls Singles</div>
+                                {isEmpty ? (
+                                  <div className="text-xs text-gray-500">Drag player here</div>
+                                ) : (
+                                  <div className="text-xs text-green-600 font-medium">
+                                    {assignedPlayers.map(p => p.name).join(', ')}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
 
@@ -259,14 +331,30 @@ export default function LineupsPage() {
                     <div>
                       <h5 className="font-medium mb-2 text-sm">Girls Doubles</h5>
                       <div className="space-y-2">
-                        {[1, 2].map((num) => (
-                          <div key={`girls_doubles_${num}`} className="border-2 border-dashed border-pink-200 rounded-lg p-3 min-h-[60px] flex items-center bg-pink-50">
-                            <div className="flex-1">
-                              <div className="text-sm font-medium">{num}st Girls Doubles</div>
-                              <div className="text-xs text-gray-500">Drag 2 players here</div>
+                        {[1, 2].map((num) => {
+                          const positionKey = `girls_doubles_${num}`
+                          const assignedPlayers = currentLineup[positionKey] || []
+                          const isEmpty = assignedPlayers.length === 0
+                          
+                          return (
+                            <div key={`girls_doubles_${num}`} className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
+                              isEmpty 
+                                ? 'border-dashed border-pink-200 bg-pink-50' 
+                                : 'border-solid border-pink-300 bg-pink-100'
+                            }`}>
+                              <div className="flex-1">
+                                <div className="text-sm font-medium">{num}st Girls Doubles</div>
+                                {isEmpty ? (
+                                  <div className="text-xs text-gray-500">Drag 2 players here</div>
+                                ) : (
+                                  <div className="text-xs text-green-600 font-medium">
+                                    {assignedPlayers.map(p => p.name).join(', ')}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
@@ -275,10 +363,20 @@ export default function LineupsPage() {
                 {/* Mixed Doubles */}
                 <div className="mt-6">
                   <h4 className="font-medium text-purple-700 mb-2">Mixed Doubles</h4>
-                  <div className="border-2 border-dashed border-purple-200 rounded-lg p-3 min-h-[60px] flex items-center bg-purple-50">
+                  <div className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
+                    currentLineup['mixed_doubles_1']?.length === 0
+                      ? 'border-dashed border-purple-200 bg-purple-50'
+                      : 'border-solid border-purple-300 bg-purple-100'
+                  }`}>
                     <div className="flex-1">
                       <div className="text-sm font-medium">Mixed Doubles</div>
-                      <div className="text-xs text-gray-500">Drag 1 boy + 1 girl here</div>
+                      {!currentLineup['mixed_doubles_1'] || currentLineup['mixed_doubles_1'].length === 0 ? (
+                        <div className="text-xs text-gray-500">Drag 1 boy + 1 girl here</div>
+                      ) : (
+                        <div className="text-xs text-green-600 font-medium">
+                          {currentLineup['mixed_doubles_1'].map(p => p.name).join(', ')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -319,6 +417,12 @@ export default function LineupsPage() {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         selectedTeamLevel={selectedTeamLevel || undefined}
+        teamId={currentTeam?.id}
+        onLineupCreated={() => {
+          if (currentTeam) {
+            loadLineups(currentTeam.id)
+          }
+        }}
       />
     </div>
   )
