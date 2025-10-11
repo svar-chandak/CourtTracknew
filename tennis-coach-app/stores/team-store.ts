@@ -161,46 +161,30 @@ export const useTeamStore = create<TeamState>((set, get) => ({
 
   addPlayer: async (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => {
     try {
-      // Generate a unique player ID
-      const generatePlayerId = () => {
-        return Math.random().toString(36).substring(2, 8).toUpperCase()
+      // Only insert columns that exist in the database
+      const { team_id, name, gender, grade, position_preference, team_level, utr_rating } = player
+
+      const toInsert: {
+        team_id: string
+        name: string
+        gender?: 'male' | 'female'
+        grade?: number
+        position_preference?: string
+        team_level?: 'varsity' | 'jv' | 'freshman'
+        utr_rating?: number
+      } = {
+        team_id,
+        name,
+        gender,
+        grade,
+        position_preference,
+        team_level,
+        utr_rating,
       }
-
-      let playerId = generatePlayerId()
-      let attempts = 0
-      const maxAttempts = 10
-
-      // Ensure unique player ID
-      while (attempts < maxAttempts) {
-        const { data: existing } = await supabase
-          .from('players')
-          .select('id')
-          .eq('player_id', playerId)
-          .single()
-
-        if (!existing) break
-        
-        playerId = generatePlayerId()
-        attempts++
-      }
-
-      if (attempts >= maxAttempts) {
-        return { error: 'Failed to generate unique player ID' }
-      }
-
-      // Prepare player data with generated player_id
-      const playerData = {
-        ...player,
-        player_id: playerId,
-        // Remove fields that might not exist in the database yet
-        password_hash: undefined,
-      }
-
-      console.log('Attempting to insert player:', playerData)
 
       const { error } = await supabase
         .from('players')
-        .insert(playerData)
+        .insert(toInsert)
 
       if (error) {
         console.error('Database error:', error)
@@ -208,7 +192,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }
 
       // Refresh players list
-      await get().getPlayers(player.team_id)
+      await get().getPlayers(team_id)
       return { error: null }
     } catch (error) {
       console.error('Unexpected error:', error)
