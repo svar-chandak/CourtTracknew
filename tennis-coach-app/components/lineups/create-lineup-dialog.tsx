@@ -66,10 +66,13 @@ interface DraggablePlayerProps {
 
 function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGender }: DraggablePlayerProps) {
   // Check if this player can be placed in this position
-  const canPlace = !positionGender || positionGender === 'mixed' || positionGender === player.gender
+  // Allow if player's gender is unknown; only block when known and mismatched
+  const canPlace = !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender
   
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={`p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
@@ -78,6 +81,13 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={disabled || !canPlace ? undefined : onToggle}
+      onKeyDown={(e) => {
+        if (disabled || !canPlace) return
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onToggle()
+        }
+      }}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
