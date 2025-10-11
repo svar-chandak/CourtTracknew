@@ -148,6 +148,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         .order('name')
 
       console.log('Players query result:', { players, error })
+      console.log('Raw players data:', JSON.stringify(players, null, 2))
+      console.log('Players type:', typeof players)
+      console.log('Players is array:', Array.isArray(players))
 
       if (error) {
         console.error('Error fetching players:', error)
