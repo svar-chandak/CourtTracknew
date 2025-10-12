@@ -106,8 +106,8 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
   }
 
   const handleTeamCodeChange = async (teamCode: string) => {
-    if (teamCode.length >= 3) {
-      const { team, error } = await findTeamByCode(teamCode)
+    if (teamCode && teamCode.trim().length >= 3) {
+      const { team, error } = await findTeamByCode(teamCode.trim())
       if (team && !error) {
         setFoundTeam(team)
       } else {

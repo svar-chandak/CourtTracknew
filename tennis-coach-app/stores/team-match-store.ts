@@ -81,6 +81,10 @@ export const useTeamMatchStore = create<TeamMatchState>((set, get) => ({
 
   findTeamByCode: async (teamCode: string) => {
     try {
+      if (!teamCode || typeof teamCode !== 'string') {
+        return { team: null, error: 'Invalid team code' }
+      }
+
       const { data, error } = await supabase
         .from('teams')
         .select('*')

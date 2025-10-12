@@ -14,7 +14,7 @@ export default function DashboardPage() {
   const { coach, loading: authLoading, getCurrentCoach } = useAuthStore()
   const { currentTeam, players, loading: teamLoading, getCurrentTeam, getPlayers } = useTeamStore()
   const { tournaments, loading: tournamentLoading, getTournaments } = useTournamentStore()
-  const { teamMatches, getTeamMatches, getTeamMatchSummary } = useTeamMatchStore()
+  const { teamMatches, getTeamMatches } = useTeamMatchStore()
 
   useEffect(() => {
     if (coach && coach.id) {
