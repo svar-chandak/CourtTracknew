@@ -56,14 +56,13 @@ interface DraggablePlayerProps {
 }
 
 function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGender }: DraggablePlayerProps) {
-  console.log('DraggablePlayer rendered for:', player.name, 'disabled:', disabled, 'canPlace:', !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender)
-  
   // Check if this player can be placed in this position
   // Allow if player's gender is unknown; only block when known and mismatched
   const canPlace = !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender
   
   return (
-    <div
+    <button
+      type="button"
       className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
@@ -71,34 +70,12 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             ? 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        console.log('Player card clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
+      onClick={() => {
         if (!disabled && canPlace) {
-          console.log('Calling onToggle for player:', player.name)
-          onToggle()
-        } else {
-          console.log('Click blocked - disabled:', disabled, 'canPlace:', canPlace)
-        }
-      }}
-      onMouseDown={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        console.log('Mouse down on player:', player.name)
-      }}
-      onMouseUp={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        console.log('Mouse up on player:', player.name)
-      }}
-      onKeyDown={(e) => {
-        if (disabled || !canPlace) return
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
           onToggle()
         }
       }}
+      disabled={disabled || !canPlace}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
@@ -114,7 +91,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
           <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
       </div>
-    </div>
+    </button>
   )
 }
 
@@ -280,7 +257,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
-    console.log('handlePlayerToggle called with:', positionId, playerId)
     setLineup(prev => {
       const current = prev[positionId] || []
       const position = positions.find(p => p.id === positionId)
@@ -373,10 +349,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     setIsLoading(true)
     
     try {
-      // Debug: Log the current lineup state
-      console.log('Current lineup state:', lineup)
-      console.log('Lineup entries:', Object.entries(lineup))
-      
       // Convert the lineup format to database format
       const lineupEntries = Object.entries(lineup)
         .map(([positionId, playerIds]) => {
@@ -410,15 +382,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       }
 
       // Save to database using the store
-      console.log('Attempting to save lineup entries:', lineupEntries)
-      
       // Create each lineup entry using the store
       for (const entry of lineupEntries) {
-        console.log('Creating lineup entry:', entry)
         await createLineup(entry)
       }
-
-      console.log('All lineup entries created successfully')
       toast.success('Lineup created successfully!')
       onLineupCreated?.(lineup)
       onOpenChange(false)
