@@ -112,7 +112,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
           <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
       </div>
-    </button>
+    </div>
   )
 }
 
@@ -540,3 +540,4 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     </Dialog>
   )
 }
+                  
