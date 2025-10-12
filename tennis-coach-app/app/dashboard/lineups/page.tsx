@@ -65,8 +65,49 @@ export default function LineupsPage() {
     const currentLineup: Record<string, Player[]> = {}
     
     lineups.forEach(lineup => {
-      const positionKey = lineup.position
-      const lineupPlayers = lineup.player_ids
+      const { position, player_ids } = lineup
+      
+      // Skip if no player_ids or empty array
+      if (!player_ids || player_ids.length === 0) {
+        return
+      }
+      
+      // Map database position names to display position IDs
+      let positionKey: string
+      
+      // Handle different possible position formats
+      if (position.startsWith('boys_singles_')) {
+        const order = position.split('_')[2]
+        positionKey = `${order}BS`
+      } else if (position.startsWith('girls_singles_')) {
+        const order = position.split('_')[2]
+        positionKey = `${order}GS`
+      } else if (position.startsWith('boys_doubles_')) {
+        const order = position.split('_')[2]
+        // Map roster order to position ID (7->1, 8->2)
+        const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
+        positionKey = `${positionNumber}BD`
+      } else if (position.startsWith('girls_doubles_')) {
+        const order = position.split('_')[2]
+        // Map roster order to position ID (7->1, 8->2)
+        const positionNumber = order === '7' ? '1' : order === '8' ? '2' : order
+        positionKey = `${positionNumber}GD`
+      } else if (position === 'mixed_doubles_1') {
+        positionKey = 'MD'
+      } else if (position === '1GS' || position === '2GS' || position === '3GS' || position === '4GS' || position === '5GS' || position === '6GS') {
+        // Already in display format
+        positionKey = position
+      } else if (position === '1BS' || position === '2BS' || position === '3BS' || position === '4BS' || position === '5BS' || position === '6BS') {
+        // Already in display format
+        positionKey = position
+      } else if (position === '1GD' || position === '2GD' || position === '1BD' || position === '2BD' || position === 'MD') {
+        // Already in display format
+        positionKey = position
+      } else {
+        return // Skip unknown positions
+      }
+      
+      const lineupPlayers = player_ids
         .map(id => players.find(p => p.id === id))
         .filter(Boolean) as Player[]
       
