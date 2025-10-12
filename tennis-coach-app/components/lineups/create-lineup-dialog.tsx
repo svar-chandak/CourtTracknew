@@ -341,10 +341,14 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
 
   const onSubmit = async () => {
+    console.log('onSubmit called')
     if (!teamId) {
       toast.error('Team ID is required to save lineup')
       return
     }
+
+    console.log('Current lineup state:', lineup)
+    console.log('Team ID:', teamId)
 
     setIsLoading(true)
     
@@ -376,6 +380,8 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         })
         .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
 
+      console.log('Lineup entries to save:', lineupEntries)
+
       if (lineupEntries.length === 0) {
         toast.error('No valid lineup positions to save')
         return
@@ -384,8 +390,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       // Save to database using the store
       // Create each lineup entry using the store
       for (const entry of lineupEntries) {
+        console.log('Creating lineup entry:', entry)
         await createLineup(entry)
       }
+      console.log('All lineup entries created successfully')
       toast.success('Lineup created successfully!')
       onLineupCreated?.(lineup)
       onOpenChange(false)
