@@ -64,6 +64,8 @@ export default function LineupsPage() {
   const getCurrentLineup = () => {
     const currentLineup: Record<string, Player[]> = {}
     
+    console.log('getCurrentLineup: Processing', lineups.length, 'lineups for team level:', selectedTeamLevel)
+    
     lineups.forEach(lineup => {
       const { position, player_ids } = lineup
       
@@ -81,7 +83,10 @@ export default function LineupsPage() {
         // Check if all players in this lineup match the selected team level
         const allPlayersMatchTeamLevel = lineupPlayers.every(player => player.team_level === selectedTeamLevel)
         
+        console.log(`Lineup ${position}: players=${lineupPlayers.map(p => `${p.name}(${p.team_level})`).join(', ')}, allMatch=${allPlayersMatchTeamLevel}`)
+        
         if (!allPlayersMatchTeamLevel) {
+          console.log(`Skipping lineup ${position} - not all players match team level ${selectedTeamLevel}`)
           return // Skip this lineup if not all players match the selected team level
         }
       }

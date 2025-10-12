@@ -131,6 +131,8 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
       .flatMap(posId => lineup[posId] || [])
   }
   
+  // Note: Players CAN be in both singles and doubles, so we don't add cross-category conflicts
+  
   // Filter available players - exclude players in conflicting positions only
   const visiblePlayerIds = new Set(allPlayers.map(p => p.id))
   let availablePlayers = allPlayers.filter(p => !conflictingPlayers.includes(p.id))
@@ -327,6 +329,8 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
             // For mixed doubles: remove from other mixed doubles positions
             conflictingPositions = ['MD'].filter(posId => posId !== positionId)
           }
+          
+          // Note: Players CAN be in both singles and doubles, so we don't add cross-category conflicts
           
           // Remove player from conflicting positions
           conflictingPositions.forEach(posId => {
