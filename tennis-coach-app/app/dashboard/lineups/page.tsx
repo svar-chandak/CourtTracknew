@@ -64,7 +64,6 @@ export default function LineupsPage() {
   const getCurrentLineup = () => {
     const currentLineup: Record<string, Player[]> = {}
     
-    console.log('getCurrentLineup: Processing', lineups.length, 'lineups for team level:', selectedTeamLevel)
     
     // Sort lineups by creation date (most recent first) and group by position
     const lineupsByPosition = new Map<string, any>()
@@ -86,10 +85,7 @@ export default function LineupsPage() {
         // Check if all players in this lineup match the selected team level
         const allPlayersMatchTeamLevel = lineupPlayers.every(player => player.team_level === selectedTeamLevel)
         
-        console.log(`Lineup ${position}: players=${lineupPlayers.map(p => `${p.name}(${p.team_level})`).join(', ')}, allMatch=${allPlayersMatchTeamLevel}`)
-        
         if (!allPlayersMatchTeamLevel) {
-          console.log(`Skipping lineup ${position} - not all players match team level ${selectedTeamLevel}`)
           return // Skip this lineup if not all players match the selected team level
         }
       }
@@ -211,12 +207,7 @@ export default function LineupsPage() {
     return dialogLineup
   }
 
-  const currentLineup = useMemo(() => {
-    console.log('Page: Recalculating currentLineup with:', { lineups: lineups.length, players: players.length, selectedTeamLevel })
-    const result = getCurrentLineup()
-    console.log('Page: Current lineup result:', result)
-    return result
-  }, [lineups, players, selectedTeamLevel])
+  const currentLineup = useMemo(() => getCurrentLineup(), [lineups, players, selectedTeamLevel])
 
   if (loading) {
     return (

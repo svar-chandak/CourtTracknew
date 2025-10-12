@@ -392,7 +392,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       }
 
       // Delete old lineup entries for this team level first
-      console.log('Deleting old lineup entries for team:', teamId)
       const { error: deleteError } = await supabase
         .from('lineups')
         .delete()
@@ -403,8 +402,6 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         console.error('Error deleting old lineups:', deleteError)
         throw deleteError
       }
-
-      console.log('Old lineup entries deleted successfully')
 
       // Save to database using the store
       // Create each lineup entry using the store
