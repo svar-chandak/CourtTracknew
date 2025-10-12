@@ -5,16 +5,21 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations'
 import { useAuthStore } from '@/stores/auth-store'
+import { useTeamStore } from '@/stores/team-store'
+import { useAttendanceStore } from '@/stores/attendance-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Settings, User, School, Phone } from 'lucide-react'
+import { Settings, User, School, Phone, Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const { coach, updateProfile } = useAuthStore()
+  const { currentTeam, players, getPlayers } = useTeamStore()
+  const { attendance, practiceSessions, getAttendance, getPracticeSessions } = useAttendanceStore()
 
   const {
     register,
@@ -55,6 +60,96 @@ export default function SettingsPage() {
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    if (!coach || !currentTeam) {
+      toast.error('Team information not available')
+      return
+    }
+
+    setIsExporting(true)
+    
+    try {
+      // Fetch all data
+      await getPlayers(currentTeam.id)
+      await getAttendance(currentTeam.id)
+      await getPracticeSessions(currentTeam.id)
+
+      // Prepare export data
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        coach: {
+          id: coach.id,
+          full_name: coach.full_name,
+          email: coach.email,
+          school_name: coach.school_name,
+          team_code: coach.team_code,
+          phone: coach.phone,
+        },
+        team: {
+          id: currentTeam.id,
+          team_code: currentTeam.team_code,
+          school_name: currentTeam.school_name,
+          team_level: currentTeam.team_level,
+          gender: currentTeam.gender,
+          season_record_wins: currentTeam.season_record_wins,
+          season_record_losses: currentTeam.season_record_losses,
+        },
+        players: players.map(player => ({
+          id: player.id,
+          name: player.name,
+          email: player.email,
+          grade: player.grade,
+          phone: player.phone,
+          position_preference: player.position_preference,
+          skill_level: player.skill_level,
+          gender: player.gender,
+          team_level: player.team_level,
+          utr_rating: player.utr_rating,
+        })),
+        attendance: attendance.map(record => ({
+          id: record.id,
+          player_id: record.player_id,
+          event_type: record.event_type,
+          event_id: record.event_id,
+          event_date: record.event_date,
+          status: record.status,
+          notes: record.notes,
+          recorded_by: record.recorded_by,
+          created_at: record.created_at,
+        })),
+        practiceSessions: practiceSessions.map(session => ({
+          id: session.id,
+          practice_date: session.practice_date,
+          practice_time: session.practice_time,
+          location: session.location,
+          description: session.description,
+          coach_id: session.coach_id,
+          created_at: session.created_at,
+        })),
+      }
+
+      // Create and download file
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `courttrack-export-${coach.team_code}-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Data exported successfully!')
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Failed to export data')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -207,8 +302,14 @@ export default function SettingsPage() {
               <h4 className="font-medium">Export Data</h4>
               <p className="text-sm text-gray-600">Download your team and match data</p>
             </div>
-            <Button variant="outline">
-              Export
+            <Button 
+              variant="outline" 
+              onClick={handleExportData}
+              disabled={isExporting}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {isExporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>
 
