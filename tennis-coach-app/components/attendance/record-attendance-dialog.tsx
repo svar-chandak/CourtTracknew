@@ -146,10 +146,15 @@ export function RecordAttendanceDialog({
         
         if (existingRecord) {
           // Update existing record
-          await updateAttendance(existingRecord.id, status, note)
+          const updateResult = await updateAttendance(existingRecord.id, status, note)
+          if (updateResult.error) {
+            console.error('Failed to update attendance:', updateResult.error)
+            toast.error(`Failed to update attendance for ${player.name}: ${updateResult.error}`)
+            return
+          }
         } else {
           // Create new record
-          await recordAttendance({
+          const attendanceData = {
             team_id: teamId,
             player_id: player.id,
             event_type: eventType,
@@ -158,7 +163,15 @@ export function RecordAttendanceDialog({
             status,
             notes: note || undefined,
             recorded_by: coach.id,
-          })
+          }
+          console.log('Recording attendance with data:', attendanceData)
+          
+          const recordResult = await recordAttendance(attendanceData)
+          if (recordResult.error) {
+            console.error('Failed to record attendance:', recordResult.error)
+            toast.error(`Failed to record attendance for ${player.name}: ${recordResult.error}`)
+            return
+          }
         }
       }
 
