@@ -107,7 +107,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   recordAttendance: async (attendance) => {
     try {
       const { error } = await supabase
-        .from('attendance')
+        .from('attendance_records')
         .insert(attendance)
 
       if (error) {
@@ -128,7 +128,7 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   updateAttendance: async (id: string, status: AttendanceStatus, notes?: string) => {
     try {
       const { error } = await supabase
-        .from('attendance')
+        .from('attendance_records')
         .update({ status, notes })
         .eq('id', id)
 
@@ -174,12 +174,11 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
   getAttendanceForEvent: async (eventType: EventType, eventId: string) => {
     try {
       const { data, error } = await supabase
-        .from('attendance')
+        .from('attendance_records')
         .select(`
           *,
           player:players(*),
-          team:teams(*),
-          recorded_by_coach:coaches(*)
+          team:teams(*)
         `)
         .eq('event_type', eventType)
         .eq('event_id', eventId)
