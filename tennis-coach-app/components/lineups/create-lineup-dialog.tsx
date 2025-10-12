@@ -116,23 +116,28 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
   let conflictingPlayers: string[] = []
   
   if (position.type === 'singles') {
-    // For singles: exclude players already in ANY other singles position
-    const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+    // For singles: exclude players already in other singles positions of the same gender
+    const singlesPositions = position.gender === 'female' 
+      ? ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS']
+      : ['1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
     conflictingPlayers = singlesPositions
       .filter(posId => posId !== position.id)
       .flatMap(posId => lineup[posId] || [])
   } else if (position.type === 'doubles' || position.type === 'mixed') {
-    // For any doubles position: exclude players already in ANY other doubles position (regular or mixed)
-    const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
+    // For any doubles position: exclude players already in other doubles positions of the same gender
+    const doublesPositions = position.gender === 'female' 
+      ? ['1GD', '2GD']
+      : position.gender === 'male'
+      ? ['1BD', '2BD']
+      : ['MD'] // mixed doubles
     conflictingPlayers = doublesPositions
       .filter(posId => posId !== position.id)
       .flatMap(posId => lineup[posId] || [])
   }
   
-  // Filter available players - exclude players in ANY lineup position (only those visible in this dialog)
+  // Filter available players - exclude players in conflicting positions only
   const visiblePlayerIds = new Set(allPlayers.map(p => p.id))
-  const allAssignedPlayers = Object.values(lineup).flat().filter(id => visiblePlayerIds.has(id))
-  let availablePlayers = allPlayers.filter(p => !allAssignedPlayers.includes(p.id))
+  let availablePlayers = allPlayers.filter(p => !conflictingPlayers.includes(p.id))
   
   // Add back players who are selected in THIS position (they should show as available to deselect)
   const currentPositionPlayers = lineup[position.id] || []
@@ -309,12 +314,18 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
           let conflictingPositions: string[] = []
           
           if (position.type === 'singles') {
-            // For singles: remove from other singles positions
-            const singlesPositions = ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS', '1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
+            // For singles: remove from other singles positions of the same gender
+            const singlesPositions = position.gender === 'female' 
+              ? ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS']
+              : ['1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
             conflictingPositions = singlesPositions.filter(posId => posId !== positionId)
           } else if (position.type === 'doubles' || position.type === 'mixed') {
-            // For any doubles position: remove from other doubles positions (regular or mixed)
-            const doublesPositions = ['1GD', '2GD', '1BD', '2BD', 'MD']
+            // For any doubles position: remove from other doubles positions of the same gender
+            const doublesPositions = position.gender === 'female' 
+              ? ['1GD', '2GD']
+              : position.gender === 'male'
+              ? ['1BD', '2BD']
+              : ['MD'] // mixed doubles
             conflictingPositions = doublesPositions.filter(posId => posId !== positionId)
           }
           
