@@ -305,7 +305,7 @@ export default function LineupsPage() {
                       <h5 className="font-medium mb-2 text-sm">Boys Singles</h5>
                       <div className="space-y-2">
                         {[1, 2, 3].map((num) => {
-                          const positionKey = `boys_singles_${num}`
+                          const positionKey = `${num}BS`
                           const assignedPlayers = currentLineup[positionKey] || []
                           const isEmpty = assignedPlayers.length === 0
                           
@@ -334,7 +334,7 @@ export default function LineupsPage() {
                       <h5 className="font-medium mb-2 text-sm">Boys Doubles</h5>
                       <div className="space-y-2">
                         {[1, 2].map((num) => {
-                          const positionKey = `boys_doubles_${num}`
+                          const positionKey = `${num}BD`
                           const assignedPlayers = currentLineup[positionKey] || []
                           const isEmpty = assignedPlayers.length === 0
                           
@@ -368,7 +368,7 @@ export default function LineupsPage() {
                       <h5 className="font-medium mb-2 text-sm">Girls Singles</h5>
                       <div className="space-y-2">
                         {[1, 2, 3].map((num) => {
-                          const positionKey = `girls_singles_${num}`
+                          const positionKey = `${num}GS`
                           const assignedPlayers = currentLineup[positionKey] || []
                           const isEmpty = assignedPlayers.length === 0
                           
@@ -397,7 +397,7 @@ export default function LineupsPage() {
                       <h5 className="font-medium mb-2 text-sm">Girls Doubles</h5>
                       <div className="space-y-2">
                         {[1, 2].map((num) => {
-                          const positionKey = `girls_doubles_${num}`
+                          const positionKey = `${num}GD`
                           const assignedPlayers = currentLineup[positionKey] || []
                           const isEmpty = assignedPlayers.length === 0
                           
@@ -427,15 +427,15 @@ export default function LineupsPage() {
                 <div className="mt-6">
                   <h4 className="font-medium text-purple-700 mb-2">Mixed Doubles</h4>
                   <div className={`border-2 rounded-lg p-3 min-h-[60px] flex items-center ${
-                    currentLineup['mixed_doubles_1']?.length === 0
+                    currentLineup['MD']?.length === 0
                       ? 'border-dashed border-purple-200 bg-purple-50'
                       : 'border-solid border-purple-300 bg-purple-100'
                   }`}>
                     <div className="flex-1">
                       <div className="text-sm font-medium">Mixed Doubles</div>
-                      {currentLineup['mixed_doubles_1'] && currentLineup['mixed_doubles_1'].length > 0 && (
+                      {currentLineup['MD'] && currentLineup['MD'].length > 0 && (
                         <div className="text-xs text-green-600 font-medium">
-                          {currentLineup['mixed_doubles_1'].map(p => p.name).join(', ')}
+                          {currentLineup['MD'].map(p => p.name).join(', ')}
                         </div>
                       )}
                     </div>
