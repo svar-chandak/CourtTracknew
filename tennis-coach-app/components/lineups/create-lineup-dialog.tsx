@@ -56,6 +56,8 @@ interface DraggablePlayerProps {
 }
 
 function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGender }: DraggablePlayerProps) {
+  console.log('DraggablePlayer rendered for:', player.name, 'disabled:', disabled, 'canPlace:', !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender)
+  
   // Check if this player can be placed in this position
   // Allow if player's gender is unknown; only block when known and mismatched
   const canPlace = !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender
@@ -278,6 +280,7 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
 
 
   const handlePlayerToggle = (positionId: string, playerId: string) => {
+    console.log('handlePlayerToggle called with:', positionId, playerId)
     setLineup(prev => {
       const current = prev[positionId] || []
       const position = positions.find(p => p.id === positionId)
