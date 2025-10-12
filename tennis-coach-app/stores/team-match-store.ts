@@ -20,6 +20,7 @@ interface TeamMatchState {
   
   // Team matches
   getTeamMatches: (teamId: string, teamLevel?: string) => Promise<void>
+  findTeamByCode: (teamCode: string) => Promise<{ team: any | null; error: string | null }>
   createTeamMatch: (data: CreateTeamMatchData) => Promise<{ error: string | null }>
   updateTeamMatch: (id: string, data: UpdateTeamMatchData) => Promise<{ error: string | null }>
   deleteTeamMatch: (id: string) => Promise<{ error: string | null }>
@@ -75,6 +76,24 @@ export const useTeamMatchStore = create<TeamMatchState>((set, get) => ({
       set({ teamMatches: data || [], loading: false })
     } catch (error) {
       set({ error: 'Failed to fetch team matches', loading: false })
+    }
+  },
+
+  findTeamByCode: async (teamCode: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .eq('team_code', teamCode.toUpperCase())
+        .single()
+
+      if (error) {
+        return { team: null, error: 'Team not found with that code' }
+      }
+
+      return { team: data, error: null }
+    } catch (error) {
+      return { team: null, error: 'Failed to find team' }
     }
   },
 

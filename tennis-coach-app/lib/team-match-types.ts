@@ -80,6 +80,15 @@ export interface CreateTeamMatchData {
   notes?: string
 }
 
+export interface CreateTeamMatchFormData {
+  away_team_code: string
+  team_level: 'varsity' | 'jv' | 'freshman'
+  match_date: string
+  match_time?: string
+  location?: string
+  notes?: string
+}
+
 export interface UpdateTeamMatchData {
   match_date?: string
   match_time?: string

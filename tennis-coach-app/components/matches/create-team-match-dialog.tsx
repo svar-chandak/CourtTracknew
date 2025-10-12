@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 import type { CreateTeamMatchData } from '@/lib/team-match-types'
 
 const createTeamMatchSchema = z.object({
-  away_team_id: z.string().min(1, 'Away team is required'),
+  away_team_code: z.string().min(1, 'Opponent team code is required'),
   team_level: z.enum(['varsity', 'jv', 'freshman']),
   match_date: z.string().min(1, 'Match date is required'),
   match_time: z.string().optional(),
@@ -40,8 +40,8 @@ interface CreateTeamMatchDialogProps {
 
 export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: CreateTeamMatchDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [availableTeams, setAvailableTeams] = useState<any[]>([])
-  const { createTeamMatch } = useTeamMatchStore()
+  const [foundTeam, setFoundTeam] = useState<any>(null)
+  const { createTeamMatch, findTeamByCode } = useTeamMatchStore()
   const { currentTeam } = useTeamStore()
 
   const {
@@ -61,24 +61,6 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
 
   const teamLevel = watch('team_level')
 
-  useEffect(() => {
-    if (open) {
-      // In a real app, you'd fetch available teams from an API
-      // For now, we'll use mock data
-      setAvailableTeams([
-        { id: '1', school_name: 'Westlake High School', team_level: 'varsity' },
-        { id: '2', school_name: 'Lake Travis High School', team_level: 'varsity' },
-        { id: '3', school_name: 'Austin High School', team_level: 'varsity' },
-        { id: '4', school_name: 'Westlake High School', team_level: 'jv' },
-        { id: '5', school_name: 'Lake Travis High School', team_level: 'jv' },
-        { id: '6', school_name: 'Austin High School', team_level: 'jv' },
-        { id: '7', school_name: 'Westlake High School', team_level: 'freshman' },
-        { id: '8', school_name: 'Lake Travis High School', team_level: 'freshman' },
-        { id: '9', school_name: 'Austin High School', team_level: 'freshman' },
-      ])
-    }
-  }, [open])
-
   const onSubmit = async (data: CreateTeamMatchFormData) => {
     if (!currentTeam) {
       toast.error('Team information not available')
@@ -88,8 +70,18 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
     setIsLoading(true)
     
     try {
+      // First, find the team by team code
+      const { team, error: findError } = await findTeamByCode(data.away_team_code)
+      
+      if (findError || !team) {
+        toast.error(findError || 'Team not found with that code')
+        return
+      }
+
       const matchData: CreateTeamMatchData = {
-        ...data,
+        away_team_id: team.id,
+        team_level: data.team_level,
+        match_date: data.match_date,
         match_time: data.match_time && data.match_time.trim() !== '' ? data.match_time : undefined,
         location: data.location && data.location.trim() !== '' ? data.location : undefined,
         notes: data.notes && data.notes.trim() !== '' ? data.notes : undefined,
@@ -102,8 +94,9 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
         return
       }
 
-      toast.success('Team match scheduled successfully!')
+      toast.success(`Team match scheduled successfully against ${team.school_name}!`)
       reset()
+      setFoundTeam(null)
       onMatchCreated()
     } catch (error) {
       toast.error('An unexpected error occurred')
@@ -112,7 +105,18 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
     }
   }
 
-  const filteredTeams = availableTeams.filter(team => team.team_level === teamLevel)
+  const handleTeamCodeChange = async (teamCode: string) => {
+    if (teamCode.length >= 3) {
+      const { team, error } = await findTeamByCode(teamCode)
+      if (team && !error) {
+        setFoundTeam(team)
+      } else {
+        setFoundTeam(null)
+      }
+    } else {
+      setFoundTeam(null)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -143,22 +147,29 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="away_team_id">Opponent School</Label>
-            <Select onValueChange={(value) => setValue('away_team_id', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select opponent school" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredTeams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.school_name} ({team.team_level.toUpperCase()})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.away_team_id && (
-              <p className="text-sm text-red-600">{errors.away_team_id.message}</p>
+            <Label htmlFor="away_team_code">Opponent Team Code</Label>
+            <Input
+              id="away_team_code"
+              placeholder="Enter opponent's team code (e.g., ABC123)"
+              {...register('away_team_code')}
+              onChange={(e) => {
+                register('away_team_code').onChange(e)
+                handleTeamCodeChange(e.target.value)
+              }}
+            />
+            {errors.away_team_code && (
+              <p className="text-sm text-red-600">{errors.away_team_code.message}</p>
             )}
+            {foundTeam && (
+              <div className="p-2 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-800">
+                  ✓ Found: {foundTeam.school_name} ({foundTeam.team_level.toUpperCase()})
+                </p>
+              </div>
+            )}
+            <p className="text-xs text-gray-500">
+              Ask the opponent coach for their team code
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
