@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAttendanceStore } from '@/stores/attendance-store'
 import { useTeamStore } from '@/stores/team-store'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,7 @@ export function RecordAttendanceDialog({
   
   const { players, getPlayers } = useTeamStore()
   const { recordAttendance, updateAttendance, getAttendanceForEvent } = useAttendanceStore()
+  const { coach } = useAuthStore()
 
   useEffect(() => {
     if (teamId) {
@@ -124,6 +126,11 @@ export function RecordAttendanceDialog({
   }
 
   const onSubmit = async () => {
+    if (!coach?.id) {
+      toast.error('Coach information not available')
+      return
+    }
+
     setIsLoading(true)
     
     try {
@@ -150,7 +157,7 @@ export function RecordAttendanceDialog({
             event_date: eventDate,
             status,
             notes: note || undefined,
-            recorded_by: '', // Will be filled by backend
+            recorded_by: coach.id,
           })
         }
       }
