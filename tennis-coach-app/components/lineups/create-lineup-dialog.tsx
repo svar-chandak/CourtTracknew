@@ -116,14 +116,17 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
     conflictingPlayers = singlesPositions
       .filter(posId => posId !== position.id)
       .flatMap(posId => lineup[posId] || [])
-  } else if (position.type === 'doubles' || position.type === 'mixed') {
-    // For any doubles position: exclude players already in other doubles positions of the same gender
+  } else if (position.type === 'doubles') {
+    // For doubles: exclude players already in other doubles positions of the same gender
     const doublesPositions = position.gender === 'female' 
       ? ['1GD', '2GD']
-      : position.gender === 'male'
-      ? ['1BD', '2BD']
-      : ['MD'] // mixed doubles
+      : ['1BD', '2BD']
     conflictingPlayers = doublesPositions
+      .filter(posId => posId !== position.id)
+      .flatMap(posId => lineup[posId] || [])
+  } else if (position.type === 'mixed') {
+    // For mixed doubles: exclude players already in other mixed doubles positions
+    conflictingPlayers = ['MD']
       .filter(posId => posId !== position.id)
       .flatMap(posId => lineup[posId] || [])
   }
@@ -314,14 +317,15 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
               ? ['1GS', '2GS', '3GS', '4GS', '5GS', '6GS']
               : ['1BS', '2BS', '3BS', '4BS', '5BS', '6BS']
             conflictingPositions = singlesPositions.filter(posId => posId !== positionId)
-          } else if (position.type === 'doubles' || position.type === 'mixed') {
-            // For any doubles position: remove from other doubles positions of the same gender
+          } else if (position.type === 'doubles') {
+            // For doubles: remove from other doubles positions of the same gender
             const doublesPositions = position.gender === 'female' 
               ? ['1GD', '2GD']
-              : position.gender === 'male'
-              ? ['1BD', '2BD']
-              : ['MD'] // mixed doubles
+              : ['1BD', '2BD']
             conflictingPositions = doublesPositions.filter(posId => posId !== positionId)
+          } else if (position.type === 'mixed') {
+            // For mixed doubles: remove from other mixed doubles positions
+            conflictingPositions = ['MD'].filter(posId => posId !== positionId)
           }
           
           // Remove player from conflicting positions
