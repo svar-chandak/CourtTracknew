@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAttendanceStore } from '@/stores/attendance-store'
+import { useAuthStore } from '@/stores/auth-store'
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ interface CreatePracticeSessionDialogProps {
 export function CreatePracticeSessionDialog({ teamId, open, onOpenChange }: CreatePracticeSessionDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { createPracticeSession } = useAttendanceStore()
+  const { coach } = useAuthStore()
 
   const {
     register,
@@ -47,12 +49,17 @@ export function CreatePracticeSessionDialog({ teamId, open, onOpenChange }: Crea
   })
 
   const onSubmit = async (data: PracticeSessionFormData) => {
+    if (!coach?.id) {
+      toast.error('Coach information not available')
+      return
+    }
+
     setIsLoading(true)
     
     try {
       const { error } = await createPracticeSession({
         team_id: teamId,
-        coach_id: '', // Will be filled by the backend
+        coach_id: coach.id,
         ...data,
       })
 
