@@ -150,8 +150,6 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
     availablePlayers = availablePlayers
   }
 
-  // Debug: Log available players for this position
-  console.log(`Available players for ${position.name} (${position.gender}):`, availablePlayers.map(p => `${p.name} (${p.gender})`))
 
   // Sort players by name to maintain consistent roster order
   availablePlayers = availablePlayers.sort((a, b) => a.name.localeCompare(b.name))
