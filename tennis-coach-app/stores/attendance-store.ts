@@ -30,21 +30,20 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
     
     try {
       let query = supabase
-        .from('attendance')
+        .from('attendance_records')
         .select(`
           *,
           player:players(*),
-          team:teams(*),
-          recorded_by_coach:coaches(*)
+          team:teams(*)
         `)
         .eq('team_id', teamId)
-        .order('event_date', { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (startDate) {
-        query = query.gte('event_date', startDate)
+        query = query.gte('created_at', startDate)
       }
       if (endDate) {
-        query = query.lte('event_date', endDate)
+        query = query.lte('created_at', endDate)
       }
 
       const { data, error } = await query
@@ -66,19 +65,20 @@ export const useAttendanceStore = create<AttendanceState>((set, get) => ({
         .from('practice_sessions')
         .select(`
           *,
-          team:teams(*),
-          coach:coaches(*)
+          team:teams(*)
         `)
         .eq('team_id', teamId)
         .order('practice_date', { ascending: false })
 
       if (error) {
+        console.error('Error fetching practice sessions:', error)
         set({ error: error.message })
         return
       }
 
       set({ practiceSessions: data || [] })
     } catch (error) {
+      console.error('Failed to fetch practice sessions:', error)
       set({ error: 'Failed to fetch practice sessions' })
     }
   },
