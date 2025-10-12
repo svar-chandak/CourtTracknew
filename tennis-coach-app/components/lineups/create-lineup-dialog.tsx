@@ -392,15 +392,42 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       }
 
       // Delete old lineup entries for this team level first
-      const { error: deleteError } = await supabase
+      // First, get all existing lineups for this team
+      const { data: existingLineups, error: fetchError } = await supabase
         .from('lineups')
-        .delete()
+        .select('*')
         .eq('team_id', teamId)
-        .is('match_id', null) // Only delete general lineups, not match-specific ones
+        .is('match_id', null) // Only general lineups, not match-specific ones
 
-      if (deleteError) {
-        console.error('Error deleting old lineups:', deleteError)
-        throw deleteError
+      if (fetchError) {
+        console.error('Error fetching existing lineups:', fetchError)
+        throw fetchError
+      }
+
+      // Find lineups where ALL players match the selected team level
+      const lineupsToDelete = existingLineups?.filter(lineup => {
+        if (!lineup.player_ids || lineup.player_ids.length === 0) return false
+        
+        const lineupPlayers = lineup.player_ids
+          .map((id: string) => players.find(p => p.id === id))
+          .filter(Boolean) as Player[]
+        
+        // Check if all players in this lineup match the selected team level
+        return lineupPlayers.length > 0 && lineupPlayers.every(player => player.team_level === selectedTeamLevel)
+      }) || []
+
+      // Delete the filtered lineups
+      if (lineupsToDelete.length > 0) {
+        const lineupIdsToDelete = lineupsToDelete.map(lineup => lineup.id)
+        const { error: deleteError } = await supabase
+          .from('lineups')
+          .delete()
+          .in('id', lineupIdsToDelete)
+
+        if (deleteError) {
+          console.error('Error deleting old lineups:', deleteError)
+          throw deleteError
+        }
       }
 
       // Save to database using the store
