@@ -61,9 +61,7 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
   const canPlace = !positionGender || positionGender === 'mixed' || !player.gender || positionGender === player.gender
   
   return (
-    <button
-      type="button"
-      style={{ pointerEvents: 'auto' }}
+    <div
       className={`w-full text-left p-3 border rounded-lg cursor-pointer transition-all ${
         isSelected 
           ? 'bg-green-100 border-green-300 shadow-md' 
@@ -71,7 +69,9 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
             ? 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
       } ${disabled || !canPlace ? 'opacity-50 cursor-not-allowed' : ''}`}
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
         console.log('Player card clicked:', player.name, 'disabled:', disabled, 'canPlace:', canPlace)
         if (!disabled && canPlace) {
           console.log('Calling onToggle for player:', player.name)
@@ -79,6 +79,16 @@ function DraggablePlayer({ player, isSelected, onToggle, disabled, positionGende
         } else {
           console.log('Click blocked - disabled:', disabled, 'canPlace:', canPlace)
         }
+      }}
+      onMouseDown={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        console.log('Mouse down on player:', player.name)
+      }}
+      onMouseUp={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        console.log('Mouse up on player:', player.name)
       }}
       onKeyDown={(e) => {
         if (disabled || !canPlace) return
