@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTeamStore } from '@/stores/team-store'
 import { useTournamentStore } from '@/stores/tournament-store'
+import { useTeamMatchStore } from '@/stores/team-match-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar, Users, Trophy, TrendingUp, Clock, Plus, UserPlus, MessageSquare, ClipboardCheck } from 'lucide-react'
@@ -11,15 +12,22 @@ import Link from 'next/link'
 
 export default function DashboardPage() {
   const { coach, loading: authLoading, getCurrentCoach } = useAuthStore()
-  const { currentTeam, matches, loading: teamLoading, getCurrentTeam, getMatches } = useTeamStore()
+  const { currentTeam, players, loading: teamLoading, getCurrentTeam, getPlayers } = useTeamStore()
   const { tournaments, loading: tournamentLoading, getTournaments } = useTournamentStore()
+  const { teamMatches, getTeamMatches, getTeamMatchSummary } = useTeamMatchStore()
 
   useEffect(() => {
     if (coach && coach.id) {
       getCurrentTeam(coach.id)
-      getMatches(coach.id)
     }
-  }, [coach, getCurrentTeam, getMatches])
+  }, [coach, getCurrentTeam])
+
+  useEffect(() => {
+    if (currentTeam) {
+      getPlayers(currentTeam.id)
+      getTeamMatches(currentTeam.id)
+    }
+  }, [currentTeam, getPlayers, getTeamMatches])
 
   useEffect(() => {
     getTournaments()
@@ -51,12 +59,13 @@ export default function DashboardPage() {
     )
   }
 
-  const upcomingMatches = matches.filter(match => 
+  const upcomingMatches = teamMatches.filter(match => 
     new Date(match.match_date) >= new Date() && match.status === 'scheduled'
   ).slice(0, 3)
 
   const recentTournaments = tournaments.slice(0, 3)
   const activeTournaments = tournaments.filter(t => t.status === 'in_progress').length
+  const totalPlayers = players.length
 
   return (
     <div className="space-y-6">
@@ -78,7 +87,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalPlayers}</div>
             <p className="text-xs text-muted-foreground">
               Players on roster
             </p>
