@@ -38,7 +38,6 @@ export const useLineupStore = create<LineupState>((set, get) => ({
   },
 
   createLineup: async (lineupData) => {
-    console.log('Store: Creating lineup entry:', lineupData)
     set({ loading: true, error: null })
     try {
       const { error } = await supabase
@@ -47,10 +46,8 @@ export const useLineupStore = create<LineupState>((set, get) => ({
 
       if (error) throw error
 
-      console.log('Store: Lineup entry created, reloading lineups...')
       // Reload lineups after creating
       await get().loadLineups(lineupData.team_id)
-      console.log('Store: Lineups reloaded successfully')
       
       set({ loading: false })
     } catch (error) {

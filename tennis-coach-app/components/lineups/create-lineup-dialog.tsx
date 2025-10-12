@@ -385,10 +385,8 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
       // Save to database using the store
       // Create each lineup entry using the store
       for (const entry of lineupEntries) {
-        console.log('Creating lineup entry:', entry)
         await createLineup(entry)
       }
-      console.log('All lineup entries created, closing dialog')
       toast.success('Lineup created successfully!')
       onLineupCreated?.(lineup)
       onOpenChange(false)

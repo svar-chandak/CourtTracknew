@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTeamStore } from '@/stores/team-store'
 import { useLineupStore } from '@/stores/lineup-store'
@@ -70,6 +70,20 @@ export default function LineupsPage() {
       // Skip if no player_ids or empty array
       if (!player_ids || player_ids.length === 0) {
         return
+      }
+
+      // Filter by selected team level - only show lineups where all players match the selected team level
+      if (selectedTeamLevel) {
+        const lineupPlayers = player_ids
+          .map(id => players.find(p => p.id === id))
+          .filter(Boolean) as Player[]
+        
+        // Check if all players in this lineup match the selected team level
+        const allPlayersMatchTeamLevel = lineupPlayers.every(player => player.team_level === selectedTeamLevel)
+        
+        if (!allPlayersMatchTeamLevel) {
+          return // Skip this lineup if not all players match the selected team level
+        }
       }
       
       // Map database position names to display position IDs
@@ -179,7 +193,7 @@ export default function LineupsPage() {
     return dialogLineup
   }
 
-  const currentLineup = getCurrentLineup()
+  const currentLineup = useMemo(() => getCurrentLineup(), [lineups, players, selectedTeamLevel])
 
   if (loading) {
     return (
