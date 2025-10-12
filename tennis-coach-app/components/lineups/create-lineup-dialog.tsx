@@ -356,6 +356,10 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     setIsLoading(true)
     
     try {
+      // Debug: Log the current lineup state
+      console.log('Current lineup state:', lineup)
+      console.log('Lineup entries:', Object.entries(lineup))
+      
       // Convert the lineup format to database format
       const lineupEntries = Object.entries(lineup)
         .map(([positionId, playerIds]) => {
