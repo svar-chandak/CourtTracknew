@@ -66,6 +66,9 @@ export default function LineupsPage() {
     
     console.log('getCurrentLineup: Processing', lineups.length, 'lineups for team level:', selectedTeamLevel)
     
+    // Sort lineups by creation date (most recent first) and group by position
+    const lineupsByPosition = new Map<string, any>()
+    
     lineups.forEach(lineup => {
       const { position, player_ids } = lineup
       
@@ -90,6 +93,16 @@ export default function LineupsPage() {
           return // Skip this lineup if not all players match the selected team level
         }
       }
+      
+      // Store the most recent lineup for this position
+      if (!lineupsByPosition.has(position) || new Date(lineup.created_at) > new Date(lineupsByPosition.get(position).created_at)) {
+        lineupsByPosition.set(position, lineup)
+      }
+    })
+    
+    // Process only the most recent lineup for each position
+    lineupsByPosition.forEach(lineup => {
+      const { position, player_ids } = lineup
       
       // Map database position names to display position IDs
       let positionKey: string
@@ -127,7 +140,7 @@ export default function LineupsPage() {
       }
       
       const lineupPlayers = player_ids
-        .map(id => players.find(p => p.id === id))
+        .map((id: string) => players.find(p => p.id === id))
         .filter(Boolean) as Player[]
       
       if (lineupPlayers.length > 0) {
