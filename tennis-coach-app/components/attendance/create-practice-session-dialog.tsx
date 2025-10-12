@@ -57,10 +57,18 @@ export function CreatePracticeSessionDialog({ teamId, open, onOpenChange }: Crea
     setIsLoading(true)
     
     try {
+      // Clean up the data - convert empty strings to undefined for optional fields
+      const cleanedData = {
+        ...data,
+        practice_time: data.practice_time && data.practice_time.trim() !== '' ? data.practice_time : undefined,
+        location: data.location && data.location.trim() !== '' ? data.location : undefined,
+        description: data.description && data.description.trim() !== '' ? data.description : undefined,
+      }
+
       const { error } = await createPracticeSession({
         team_id: teamId,
         coach_id: coach.id,
-        ...data,
+        ...cleanedData,
       })
 
       if (error) {
