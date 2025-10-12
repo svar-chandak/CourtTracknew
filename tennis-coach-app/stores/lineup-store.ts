@@ -47,10 +47,7 @@ export const useLineupStore = create<LineupState>((set, get) => ({
       if (error) throw error
 
       // Reload lineups after creating
-      const { lineups } = get()
-      if (lineups.length > 0) {
-        await get().loadLineups(lineupData.team_id)
-      }
+      await get().loadLineups(lineupData.team_id)
       
       set({ loading: false })
     } catch (error) {

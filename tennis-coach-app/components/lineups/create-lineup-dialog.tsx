@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { GripVertical, Users, Trophy } from 'lucide-react'
 import type { Player } from '@/lib/types'
-import { supabase } from '@/lib/supabase'
+import { useLineupStore } from '@/stores/lineup-store'
 
 interface CreateLineupDialogProps {
   players: Player[]
@@ -216,6 +216,7 @@ function PositionDropZone({ position, selectedPlayers, allPlayers, onPlayerToggl
 export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreated, selectedTeamLevel, teamId, currentLineup }: CreateLineupDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [lineup, setLineup] = useState<Record<string, string[]>>({})
+  const { createLineup } = useLineupStore()
 
   // Filter players by selected team level and sort by name to maintain roster order
   const filteredPlayers = selectedTeamLevel 
@@ -356,44 +357,43 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
     
     try {
       // Convert the lineup format to database format
-      const lineupEntries = Object.entries(lineup).map(([positionId, playerIds]) => {
-        const position = positions.find(p => p.id === positionId)
-        if (!position) return null
+      const lineupEntries = Object.entries(lineup)
+        .map(([positionId, playerIds]) => {
+          const position = positions.find(p => p.id === positionId)
+          if (!position) return null
 
-        // Map position types to database position names
-        let positionName: string
-        if (position.type === 'singles') {
-          positionName = position.gender === 'male' ? `boys_singles_${position.rosterOrder}` : `girls_singles_${position.rosterOrder}`
-        } else if (position.type === 'doubles') {
-          positionName = position.gender === 'male' ? `boys_doubles_${position.rosterOrder}` : `girls_doubles_${position.rosterOrder}`
-        } else if (position.type === 'mixed') {
-          positionName = 'mixed_doubles_1'
-        } else {
-          return null
-        }
+          // Map position types to database position names
+          let positionName: string
+          if (position.type === 'singles') {
+            positionName = position.gender === 'male' ? `boys_singles_${position.rosterOrder}` : `girls_singles_${position.rosterOrder}`
+          } else if (position.type === 'doubles') {
+            positionName = position.gender === 'male' ? `boys_doubles_${position.rosterOrder}` : `girls_doubles_${position.rosterOrder}`
+          } else if (position.type === 'mixed') {
+            positionName = 'mixed_doubles_1'
+          } else {
+            return null
+          }
 
-        return {
-          team_id: teamId,
-          match_id: null, // For now, we'll create general lineups without specific matches
-          position: positionName,
-          player_ids: playerIds
-        }
-      }).filter(Boolean)
+          return {
+            team_id: teamId,
+            match_id: null, // For now, we'll create general lineups without specific matches
+            position: positionName,
+            player_ids: playerIds
+          }
+        })
+        .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
 
       if (lineupEntries.length === 0) {
         toast.error('No valid lineup positions to save')
         return
       }
 
-      // Save to database
+      // Save to database using the store
       console.log('Attempting to save lineup entries:', lineupEntries)
-      const { error } = await supabase
-        .from('lineups')
-        .insert(lineupEntries)
-
-      if (error) {
-        console.error('Database error:', error)
-        throw error
+      
+      // Create each lineup entry using the store
+      for (const entry of lineupEntries) {
+        await createLineup(entry)
       }
 
       toast.success('Lineup created successfully!')
