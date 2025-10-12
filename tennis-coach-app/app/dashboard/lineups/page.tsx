@@ -193,7 +193,12 @@ export default function LineupsPage() {
     return dialogLineup
   }
 
-  const currentLineup = useMemo(() => getCurrentLineup(), [lineups, players, selectedTeamLevel])
+  const currentLineup = useMemo(() => {
+    console.log('Page: Recalculating currentLineup with:', { lineups: lineups.length, players: players.length, selectedTeamLevel })
+    const result = getCurrentLineup()
+    console.log('Page: Current lineup result:', result)
+    return result
+  }, [lineups, players, selectedTeamLevel])
 
   if (loading) {
     return (
