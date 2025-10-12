@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { supabase } from '@/lib/supabase-client'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -389,6 +390,21 @@ export function CreateLineupDialog({ players, open, onOpenChange, onLineupCreate
         toast.error('No valid lineup positions to save')
         return
       }
+
+      // Delete old lineup entries for this team level first
+      console.log('Deleting old lineup entries for team:', teamId)
+      const { error: deleteError } = await supabase
+        .from('lineups')
+        .delete()
+        .eq('team_id', teamId)
+        .is('match_id', null) // Only delete general lineups, not match-specific ones
+
+      if (deleteError) {
+        console.error('Error deleting old lineups:', deleteError)
+        throw deleteError
+      }
+
+      console.log('Old lineup entries deleted successfully')
 
       // Save to database using the store
       // Create each lineup entry using the store
