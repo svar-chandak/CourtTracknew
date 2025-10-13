@@ -143,7 +143,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       // Query with all available fields
       const { data: players, error } = await supabase
         .from('players')
-        .select('id, name, team_id, created_at, gender, team_level')
+        .select('id, name, team_id, created_at, gender, team_level, player_id, password_hash, grade, position_preference, utr_rating')
         .eq('team_id', teamId)
 
       if (error) {
