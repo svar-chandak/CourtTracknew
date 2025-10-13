@@ -10,7 +10,7 @@ import { AddPlayerDialog } from '@/components/team/add-player-dialog'
 import { EditPlayerDialog } from '@/components/team/edit-player-dialog'
 import { MassAddPlayersDialog } from '@/components/team/mass-add-players-dialog'
 import { MassEditPlayersDialog } from '@/components/team/mass-edit-players-dialog'
-import { Users, Plus, Edit, Trash2, GraduationCap } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, GraduationCap, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
 
@@ -43,6 +43,43 @@ export default function TeamPage() {
         toast.success('Player deleted successfully')
       }
     }
+  }
+
+  const handleExportStudentCredentials = () => {
+    // Filter players who have student login credentials
+    const studentsWithCredentials = players.filter(player => 
+      player.player_id && player.password_hash
+    )
+
+    if (studentsWithCredentials.length === 0) {
+      toast.error('No students with login credentials found. Please add student login credentials first.')
+      return
+    }
+
+    // Create CSV content
+    const csvContent = [
+      ['Student Name', 'Student ID', 'Password', 'Team Level', 'Grade'],
+      ...studentsWithCredentials.map(player => [
+        player.name,
+        player.player_id || '',
+        player.password_hash || '',
+        player.team_level || 'Not assigned',
+        player.grade?.toString() || 'Not assigned'
+      ])
+    ].map(row => row.join(',')).join('\n')
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `${currentTeam?.school_name || 'team'}_student_credentials.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    toast.success(`Exported ${studentsWithCredentials.length} student credentials`)
   }
 
   const getTeamLevelColor = (teamLevel?: string) => {
@@ -157,6 +194,10 @@ export default function TeamPage() {
                 Mass Edit ({players.filter(p => !p.team_level).length})
               </Button>
             )}
+            <Button onClick={handleExportStudentCredentials} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export Student Logins
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -207,6 +248,11 @@ export default function TeamPage() {
                                   <p className="text-xs text-gray-500 font-mono">
                                     ID: {player.id}
                                   </p>
+                                  {player.player_id && (
+                                    <p className="text-xs text-green-600 font-mono">
+                                      Student ID: {player.player_id}
+                                    </p>
+                                  )}
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
                                       Prefers: {player.position_preference.replace('_', ' ')}
@@ -240,6 +286,11 @@ export default function TeamPage() {
                                 {player.utr_rating && (
                                   <Badge variant="outline" className="text-xs">
                                     UTR {player.utr_rating}
+                                  </Badge>
+                                )}
+                                {player.player_id && player.password_hash && (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    Student Login
                                   </Badge>
                                 )}
                               </div>
@@ -266,6 +317,11 @@ export default function TeamPage() {
                                   <p className="text-xs text-gray-500 font-mono">
                                     ID: {player.id}
                                   </p>
+                                  {player.player_id && (
+                                    <p className="text-xs text-green-600 font-mono">
+                                      Student ID: {player.player_id}
+                                    </p>
+                                  )}
                                   {player.position_preference && (
                                     <p className="text-xs text-gray-600">
                                       Prefers: {player.position_preference.replace('_', ' ')}
@@ -299,6 +355,11 @@ export default function TeamPage() {
                                 {player.utr_rating && (
                                   <Badge variant="outline" className="text-xs">
                                     UTR {player.utr_rating}
+                                  </Badge>
+                                )}
+                                {player.player_id && player.password_hash && (
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
+                                    Student Login
                                   </Badge>
                                 )}
                               </div>
