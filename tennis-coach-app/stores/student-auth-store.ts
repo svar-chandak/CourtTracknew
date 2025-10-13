@@ -86,22 +86,39 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
         return
       }
 
-      const { data: player, error } = await supabase
+      // Since player_id doesn't exist in database, we need to find player by generated ID
+      // Get all players and find the one with matching generated ID
+      const { data: allPlayers, error: playersError } = await supabase
         .from('players')
         .select(`
           *,
           team:teams(*)
         `)
-        .eq('player_id', storedPlayerId)
-        .single()
 
-      if (error) {
-        console.error('Error fetching player:', error)
+      if (playersError || !allPlayers) {
+        console.error('Error fetching players:', playersError)
         set({ player: null, loading: false })
         return
       }
 
-      set({ player, loading: false })
+      // Find player by generated student ID
+      let playerData = null
+      for (const player of allPlayers) {
+        const generatedId = generateStudentId(player.name)
+        if (generatedId === storedPlayerId) {
+          playerData = player
+          break
+        }
+      }
+
+      if (!playerData) {
+        console.log('No player found with stored ID:', storedPlayerId)
+        set({ player: null, loading: false })
+        return
+      }
+
+      // Set player with generated credentials
+      set({ player: { ...playerData, player_id: storedPlayerId }, loading: false })
     } catch (error) {
       console.error('Error in getCurrentPlayer:', error)
       set({ player: null, loading: false })
