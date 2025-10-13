@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import type { Player, PlayerMatchHistory } from '@/lib/types'
+import { generateStudentId, generateDeterministicPassword } from '@/lib/student-credentials'
 
 interface StudentAuthState {
   player: Player | null
@@ -17,33 +18,42 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
 
   signIn: async (playerId: string, password: string) => {
     try {
-      // First, get the player by player_id
-      const { data: playerData, error: playerError } = await supabase
+      // Get all players to find matching credentials
+      const { data: allPlayers, error: playersError } = await supabase
         .from('players')
         .select(`
           *,
           team:teams(*)
         `)
-        .eq('player_id', playerId)
-        .single()
 
-      if (playerError || !playerData) {
+      if (playersError || !allPlayers) {
+        return { error: 'Unable to fetch players' }
+      }
+
+      // Find player by generated student ID
+      let playerData = null
+      for (const player of allPlayers) {
+        const generatedId = generateStudentId(player.name)
+        if (generatedId === playerId) {
+          playerData = player
+          break
+        }
+      }
+
+      if (!playerData) {
         return { error: 'Invalid player ID or password' }
       }
 
-      // Check if player has email and password (student login enabled)
-      if (!playerData.email || !playerData.password_hash) {
-        return { error: 'Student login not enabled for this player' }
-      }
-
-      // For now, we'll use a simple password check
-      // In production, you'd want to use proper password hashing
-      if (playerData.password_hash !== password) {
+      // Generate deterministic password for this player (same as export)
+      const generatedPassword = generateDeterministicPassword(playerData.name)
+      
+      // Check if password matches the generated one
+      if (password !== generatedPassword) {
         return { error: 'Invalid player ID or password' }
       }
 
-      // Set the player in state
-      set({ player: playerData, loading: false })
+      // Set the player in state with generated credentials
+      set({ player: { ...playerData, player_id: playerId, password_hash: password }, loading: false })
       return { error: null }
     } catch (error) {
       console.error('Student sign in error:', error)

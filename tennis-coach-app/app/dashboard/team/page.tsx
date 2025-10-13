@@ -13,6 +13,7 @@ import { MassEditPlayersDialog } from '@/components/team/mass-edit-players-dialo
 import { Users, Plus, Edit, Trash2, GraduationCap, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Player } from '@/lib/types'
+import { generateStudentId, generateDeterministicPassword } from '@/lib/student-credentials'
 
 export default function TeamPage() {
   const { coach } = useAuthStore()
@@ -45,35 +46,13 @@ export default function TeamPage() {
     }
   }
 
-  const generateStudentId = (name: string) => {
-    // Create student ID from first 2 letters of first name + first 2 letters of last name + random 3 digits
-    const nameParts = name.trim().split(' ')
-    const firstName = nameParts[0] || ''
-    const lastName = nameParts[nameParts.length - 1] || ''
-    
-    const firstTwo = firstName.substring(0, 2).toUpperCase()
-    const lastTwo = lastName.substring(0, 2).toUpperCase()
-    const randomDigits = Math.floor(100 + Math.random() * 900) // 3-digit number
-    
-    return `${firstTwo}${lastTwo}${randomDigits}`
-  }
-
-  const generateRandomPassword = () => {
-    // Generate a random 8-character password
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let password = ''
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return password
-  }
 
   const handleExportStudentCredentials = () => {
     // Generate credentials for all players (workaround for missing database columns)
     const studentsWithCredentials = players.map(player => ({
       ...player,
       player_id: player.player_id || generateStudentId(player.name),
-      password_hash: player.password_hash || generateRandomPassword()
+      password_hash: player.password_hash || generateDeterministicPassword(player.name)
     }))
 
     console.log('Generated credentials for all players:', studentsWithCredentials)
