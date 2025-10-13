@@ -5,19 +5,21 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations'
 import { useAuthStore } from '@/stores/auth-store'
+import { useRouter } from 'next/navigation'
 import { useTeamStore } from '@/stores/team-store'
 import { useAttendanceStore } from '@/stores/attendance-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Settings, User, School, Phone, Download } from 'lucide-react'
+import { Settings, User, School, Phone, Download, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const { coach, updateProfile } = useAuthStore()
+  const { coach, updateProfile, signOut } = useAuthStore()
+  const router = useRouter()
   const { currentTeam, players, getPlayers } = useTeamStore()
   const { attendance, practiceSessions, getAttendance, getPracticeSessions } = useAttendanceStore()
 
@@ -150,6 +152,16 @@ export default function SettingsPage() {
       toast.error('Failed to export data')
     } finally {
       setIsExporting(false)
+    }
+  }
+
+  const handleLogOut = async () => {
+    try {
+      await signOut()
+      router.push('/login')
+      toast.success('Logged out successfully')
+    } catch (error) {
+      toast.error('Failed to log out')
     }
   }
 
@@ -315,11 +327,16 @@ export default function SettingsPage() {
 
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
-              <h4 className="font-medium">Delete Account</h4>
-              <p className="text-sm text-gray-600">Permanently delete your account and all data</p>
+              <h4 className="font-medium">Log Out</h4>
+              <p className="text-sm text-gray-600">Sign out of your account</p>
             </div>
-            <Button variant="outline" className="text-red-600 hover:text-red-700">
-              Delete
+            <Button 
+              variant="outline" 
+              onClick={handleLogOut}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Log Out
             </Button>
           </div>
         </CardContent>
