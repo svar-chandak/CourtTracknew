@@ -43,6 +43,9 @@ export const playerSchema = z.object({
     .refine((val) => val === undefined || (val >= 1 && val <= 16), {
       message: 'UTR rating must be between 1 and 16',
     }),
+  // Student login fields
+  player_id: z.string().min(3, 'Student ID must be at least 3 characters').optional(),
+  password_hash: z.string().min(6, 'Password must be at least 6 characters').optional(),
 })
 
 // Player form input schema (for forms that accept string UTR)
@@ -53,6 +56,9 @@ export const playerFormInputSchema = z.object({
   position_preference: z.enum(['boys_singles', 'girls_singles', 'boys_doubles', 'girls_doubles', 'mixed_doubles']).optional(),
   team_level: z.enum(['varsity', 'jv', 'freshman']).optional(),
   utr_rating: z.string().optional(),
+  // Student login fields
+  player_id: z.string().min(3, 'Student ID must be at least 3 characters').optional(),
+  password_hash: z.string().min(6, 'Password must be at least 6 characters').optional(),
 })
 
 // Match validations

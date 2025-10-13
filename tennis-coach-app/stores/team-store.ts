@@ -16,7 +16,7 @@ interface TeamState {
   
   // Player actions
   getPlayers: (teamId: string) => Promise<void>
-  addPlayer: (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => Promise<{ error: string | null }>
+  addPlayer: (player: Omit<Player, 'id' | 'created_at'>) => Promise<{ error: string | null }>
   updatePlayer: (playerId: string, updates: Partial<Player>) => Promise<{ error: string | null }>
   deletePlayer: (playerId: string) => Promise<{ error: string | null }>
   bulkUpdatePlayers: (updates: Array<{ id: string; team_level?: string; gender?: string }>) => Promise<{ error: string | null }>
@@ -159,10 +159,10 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     }
   },
 
-  addPlayer: async (player: Omit<Player, 'id' | 'created_at' | 'player_id'>) => {
+  addPlayer: async (player: Omit<Player, 'id' | 'created_at'>) => {
     try {
       // Only insert columns that exist in the database
-      const { team_id, name, gender, grade, position_preference, team_level, utr_rating } = player
+      const { team_id, name, gender, grade, position_preference, team_level, utr_rating, player_id, password_hash } = player
 
       const toInsert: {
         team_id: string
@@ -172,6 +172,8 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         position_preference?: string
         team_level?: 'varsity' | 'jv' | 'freshman'
         utr_rating?: number
+        player_id?: string
+        password_hash?: string
       } = {
         team_id,
         name,
@@ -180,6 +182,8 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         position_preference,
         team_level,
         utr_rating,
+        player_id,
+        password_hash,
       }
 
       const { error } = await supabase
