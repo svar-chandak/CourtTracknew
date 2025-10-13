@@ -18,6 +18,8 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
 
   signIn: async (playerId: string, password: string) => {
     try {
+      console.log('Attempting login with:', { playerId, password })
+      
       // Get all players to find matching credentials
       const { data: allPlayers, error: playersError } = await supabase
         .from('players')
@@ -27,13 +29,17 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
         `)
 
       if (playersError || !allPlayers) {
+        console.error('Error fetching players:', playersError)
         return { error: 'Unable to fetch players' }
       }
+
+      console.log('Found players:', allPlayers.length)
 
       // Find player by generated student ID
       let playerData = null
       for (const player of allPlayers) {
         const generatedId = generateStudentId(player.name)
+        console.log(`Player: ${player.name}, Generated ID: ${generatedId}, Looking for: ${playerId}`)
         if (generatedId === playerId) {
           playerData = player
           break
@@ -41,17 +47,21 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
       }
 
       if (!playerData) {
+        console.log('No player found with matching ID')
         return { error: 'Invalid player ID or password' }
       }
 
       // Generate deterministic password for this player (same as export)
       const generatedPassword = generateDeterministicPassword(playerData.name)
+      console.log(`Player: ${playerData.name}, Generated password: ${generatedPassword}, Provided: ${password}`)
       
       // Check if password matches the generated one
       if (password !== generatedPassword) {
+        console.log('Password mismatch')
         return { error: 'Invalid player ID or password' }
       }
 
+      console.log('Login successful!')
       // Set the player in state with generated credentials
       set({ player: { ...playerData, player_id: playerId, password_hash: password }, loading: false })
       return { error: null }
