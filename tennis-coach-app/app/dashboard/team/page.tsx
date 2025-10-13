@@ -51,8 +51,8 @@ export default function TeamPage() {
     // Generate credentials for all players (workaround for missing database columns)
     const studentsWithCredentials = players.map(player => ({
       ...player,
-      player_id: player.player_id || generateStudentId(player.name),
-      password_hash: player.password_hash || generateDeterministicPassword(player.name)
+      player_id: generateStudentId(player.name), // Always generate fresh ID
+      password_hash: generateDeterministicPassword(player.name) // Always generate fresh password
     }))
 
     console.log('Generated credentials for all players:', studentsWithCredentials)
@@ -62,8 +62,8 @@ export default function TeamPage() {
       ['Student Name', 'Student ID', 'Password', 'Team Level', 'Grade'],
       ...studentsWithCredentials.map(player => [
         player.name,
-        player.player_id || '',
-        player.password_hash || '',
+        player.player_id,
+        player.password_hash,
         player.team_level || 'Not assigned',
         player.grade?.toString() || 'Not assigned'
       ])
