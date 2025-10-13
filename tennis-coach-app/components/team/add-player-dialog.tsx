@@ -47,6 +47,29 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
 
   const positionPreference = watch('position_preference')
 
+  const generateStudentId = (name: string) => {
+    // Create student ID from first 2 letters of first name + first 2 letters of last name + random 3 digits
+    const nameParts = name.trim().split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts[nameParts.length - 1] || ''
+    
+    const firstTwo = firstName.substring(0, 2).toUpperCase()
+    const lastTwo = lastName.substring(0, 2).toUpperCase()
+    const randomDigits = Math.floor(100 + Math.random() * 900) // 3-digit number
+    
+    return `${firstTwo}${lastTwo}${randomDigits}`
+  }
+
+  const generateRandomPassword = () => {
+    // Generate a random 8-character password
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let password = ''
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return password
+  }
+
   const onSubmit = async (data: PlayerFormInputData) => {
     setIsLoading(true)
     
@@ -56,6 +79,10 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
         ? parseFloat(data.utr_rating) 
         : undefined;
       
+      // Auto-generate student ID and password
+      const studentId = generateStudentId(data.name)
+      const password = generateRandomPassword()
+      
       const { error } = await addPlayer({
         team_id: teamId,
         name: data.name,
@@ -64,14 +91,14 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
         position_preference: data.position_preference || undefined,
         team_level: data.team_level || undefined,
         utr_rating: utrRating,
-        player_id: data.player_id || undefined,
-        password_hash: data.password_hash || undefined,
+        player_id: studentId,
+        password_hash: password,
       })
       
       if (error) {
         toast.error(error)
       } else {
-        toast.success('Player added successfully!')
+        toast.success(`Player added successfully! Student ID: ${studentId}, Password: ${password}`)
         reset()
         onOpenChange(false)
       }
@@ -207,44 +234,14 @@ export function AddPlayerDialog({ teamId, open, onOpenChange }: AddPlayerDialogP
             )}
           </div>
 
-          {/* Student Login Section */}
+          {/* Student Login Info */}
           <div className="border-t pt-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Student Login (Optional)</h3>
-            <p className="text-xs text-gray-500 mb-4">
-              Enable student login for this player. Leave blank if not needed.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="player_id">Student ID</Label>
-                <Input
-                  id="player_id"
-                  placeholder="e.g., CR001, JSMITH"
-                  {...register('player_id')}
-                />
-                <p className="text-xs text-gray-500">
-                  Unique ID for student login (3+ characters)
-                </p>
-                {errors.player_id && (
-                  <p className="text-sm text-red-600">{errors.player_id.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password_hash">Password</Label>
-                <Input
-                  id="password_hash"
-                  type="password"
-                  placeholder="Enter password"
-                  {...register('password_hash')}
-                />
-                <p className="text-xs text-gray-500">
-                  Password for student login (6+ characters)
-                </p>
-                {errors.password_hash && (
-                  <p className="text-sm text-red-600">{errors.password_hash.message}</p>
-                )}
-              </div>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-green-800 mb-2">Student Login</h3>
+              <p className="text-xs text-green-700">
+                A student ID and password will be automatically generated for this player, 
+                allowing them to access the student portal.
+              </p>
             </div>
           </div>
 
