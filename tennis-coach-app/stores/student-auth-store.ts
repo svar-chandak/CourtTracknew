@@ -110,6 +110,8 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
 
   getPlayerMatchHistory: async (playerId: string) => {
     try {
+      console.log('Fetching match history for player:', playerId)
+      
       // First, get the player to find their name
       const { data: player, error: playerError } = await supabase
         .from('players')
@@ -122,17 +124,12 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
         return { history: [], error: 'Player not found' }
       }
 
-      // Query match_results table using player names
+      console.log('Found player name:', player.name)
+
+      // Query match_results table using player names - SIMPLIFIED QUERY
       const { data: history, error } = await supabase
         .from('match_results')
-        .select(`
-          *,
-          match:matches(
-            *,
-            home_team:teams(*),
-            away_team:teams(*)
-          )
-        `)
+        .select('*')
         .or(`home_player_names.cs.{${player.name}},away_player_names.cs.{${player.name}}`)
         .order('created_at', { ascending: false })
 
@@ -140,6 +137,8 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
         console.error('Error fetching match history:', error)
         return { history: [], error: error.message }
       }
+
+      console.log('Found match history:', history?.length || 0, 'matches')
 
       // Transform the data into PlayerMatchHistory format
       const transformedHistory: PlayerMatchHistory[] = (history || []).map(result => {
@@ -151,7 +150,18 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
         const isWinner = result.winner === (isHomePlayer ? 'home' : 'away')
 
         return {
-          match: result.match,
+          match: {
+            id: result.match_id || '',
+            match_date: new Date().toISOString(),
+            home_team_id: '',
+            away_team_id: '',
+            match_type: 'team_match' as const,
+            status: 'completed' as const,
+            home_score: 0,
+            away_score: 0,
+            created_by: '',
+            created_at: new Date().toISOString()
+          },
           division: result.position,
           position_number: 1, // Default since we don't have this field
           player_names: playerNames,
