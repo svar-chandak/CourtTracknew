@@ -110,8 +110,21 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
 
   getPlayerMatchHistory: async (playerId: string) => {
     try {
+      // First, get the player to find their name
+      const { data: player, error: playerError } = await supabase
+        .from('players')
+        .select('name')
+        .eq('id', playerId)
+        .single()
+
+      if (playerError || !player) {
+        console.error('Error fetching player:', playerError)
+        return { history: [], error: 'Player not found' }
+      }
+
+      // Query match_results table using player names
       const { data: history, error } = await supabase
-        .from('team_match_divisions')
+        .from('match_results')
         .select(`
           *,
           match:matches(
@@ -120,8 +133,7 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
             away_team:teams(*)
           )
         `)
-        .or(`home_player_ids.cs.{${playerId}},away_player_ids.cs.{${playerId}}`)
-        .eq('completed', true)
+        .or(`home_player_names.cs.{${player.name}},away_player_names.cs.{${player.name}}`)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -130,24 +142,24 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
       }
 
       // Transform the data into PlayerMatchHistory format
-      const transformedHistory: PlayerMatchHistory[] = (history || []).map(division => {
-        const isHomePlayer = division.home_player_ids.includes(playerId)
-        const playerNames = isHomePlayer ? division.home_player_ids : division.away_player_ids
-        const opponentNames = isHomePlayer ? division.away_player_ids : division.home_player_ids
-        const setsWon = isHomePlayer ? division.home_sets_won : division.away_sets_won
-        const setsLost = isHomePlayer ? division.away_sets_won : division.home_sets_won
-        const isWinner = division.winner === (isHomePlayer ? 'home' : 'away')
+      const transformedHistory: PlayerMatchHistory[] = (history || []).map(result => {
+        const isHomePlayer = result.home_player_names.includes(player.name)
+        const playerNames = isHomePlayer ? result.home_player_names : result.away_player_names
+        const opponentNames = isHomePlayer ? result.away_player_names : result.home_player_names
+        const setsWon = isHomePlayer ? result.home_sets_won : result.away_sets_won
+        const setsLost = isHomePlayer ? result.away_sets_won : result.home_sets_won
+        const isWinner = result.winner === (isHomePlayer ? 'home' : 'away')
 
         return {
-          match: division.match,
-          division: division.division,
-          position_number: division.position_number,
+          match: result.match,
+          division: result.position,
+          position_number: 1, // Default since we don't have this field
           player_names: playerNames,
           opponent_names: opponentNames,
           sets_won: setsWon,
           sets_lost: setsLost,
-          winner: division.winner || 'home',
-          score_details: division.score_details || {},
+          winner: result.winner || 'home',
+          score_details: result.score_details || {},
           is_winner: isWinner
         }
       })
