@@ -1,6 +1,6 @@
 # CourtTrack - Tennis Coach Management Web App
 
-A comprehensive web application for high schoo tennis coaches to manage teams, create collaborative tournaments, and coordinate with other coaches. Built with Next.js 14, Supabase, and modern web technologies.
+A comprehensive web application for high school tennis coaches to manage teams, create collaborative tournaments, and coordinate with other coaches. Built with Next.js 14, Supabase, and modern web technologies.
 
 ## 🎯 Key Features
 
