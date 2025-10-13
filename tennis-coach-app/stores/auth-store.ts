@@ -140,3 +140,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }))
+
+// Initialize auth state on store creation
+if (typeof window !== 'undefined') {
+  useAuthStore.getState().getCurrentCoach()
+}

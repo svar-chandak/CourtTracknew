@@ -140,3 +140,8 @@ export const useStudentAuthStore = create<StudentAuthState>((set, get) => ({
   },
 }))
 
+// Initialize student auth state on store creation
+if (typeof window !== 'undefined') {
+  useStudentAuthStore.getState().getCurrentPlayer()
+}
+
