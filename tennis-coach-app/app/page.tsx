@@ -14,13 +14,14 @@ export default function HomePage() {
   const { coach, loading: coachLoading } = useAuthStore()
   const { player, loading: playerLoading } = useStudentAuthStore()
 
-  useEffect(() => {
-    if (coach) {
-      router.push('/dashboard')
-    } else if (player) {
-      router.push('/student-dashboard')
-    }
-  }, [coach, player, router])
+  // Remove automatic redirects - let users stay on home page
+  // useEffect(() => {
+  //   if (coach) {
+  //     router.push('/dashboard')
+  //   } else if (player) {
+  //     router.push('/student-dashboard')
+  //   }
+  // }, [coach, player, router])
 
   if (coachLoading || playerLoading) {
     return (
@@ -52,17 +53,49 @@ export default function HomePage() {
               Track matches, manage lineups, and monitor player performance with ease.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
-                <Button size="lg" className="text-lg px-8 py-6">
-                  Get Started Free
-                </Button>
-              </Link>
-              <Link href="/guide">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                  <BookOpen className="h-5 w-5 mr-2" />
-                  View Demo
-                </Button>
-              </Link>
+              {coach ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button size="lg" className="text-lg px-8 py-6">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/guide">
+                    <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      View Guide
+                    </Button>
+                  </Link>
+                </>
+              ) : player ? (
+                <>
+                  <Link href="/student-dashboard">
+                    <Button size="lg" className="text-lg px-8 py-6">
+                      Go to Student Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/guide">
+                    <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      View Guide
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/register">
+                    <Button size="lg" className="text-lg px-8 py-6">
+                      Get Started Free
+                    </Button>
+                  </Link>
+                  <Link href="/guide">
+                    <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      View Demo
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
