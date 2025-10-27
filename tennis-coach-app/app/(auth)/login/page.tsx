@@ -50,11 +50,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="flex min-h-screen">
         {/* Left Side - Image/Content */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-blue-600 relative overflow-hidden">
-          <div className="absolute inset-0 bg-black/20"></div>
+        <div className="hidden lg:flex lg:w-1/2 bg-blue-600 relative overflow-hidden">
           <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
             <div className="text-center max-w-md">
               <Circle className="h-16 w-16 mx-auto mb-6 text-white/90" />
@@ -181,7 +180,7 @@ export default function LoginPage() {
                     Remember me
                   </label>
                 </div>
-                <Link href="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
                   Forgot password?
                 </Link>
               </div>
@@ -190,7 +189,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
