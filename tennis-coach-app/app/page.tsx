@@ -64,7 +64,7 @@ export default function HomePage() {
             <div className="space-y-8">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#85D5F6] bg-opacity-20 text-[#094542] text-sm font-semibold">
                 <Star className="h-4 w-4 mr-2 text-[#05C274]" />
-                Trusted by 500+ Tennis Coaches
+                Trusted by 50+ Tennis Coaches
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
@@ -189,19 +189,19 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#05C274] mb-2">500+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">50+</div>
               <div className="text-gray-600">Active Coaches</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#05C274] mb-2">10,000+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">3,000+</div>
               <div className="text-gray-600">Matches Tracked</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#05C274] mb-2">2,500+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">1,000+</div>
               <div className="text-gray-600">Players Managed</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#05C274] mb-2">98%</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">100%</div>
               <div className="text-gray-600">Satisfaction Rate</div>
             </div>
           </div>
