@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth-store'
 import { useStudentAuthStore } from '@/stores/student-auth-store'
 import { 
-  Users, Trophy, Calendar, Target, Star, CheckCircle, 
-  BarChart3, Clock, Zap, Shield, ArrowRight
+  Users, Trophy, Calendar, BarChart3, Star, CheckCircle, 
+  Clock, Zap, ArrowRight
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -15,13 +15,13 @@ export default function HomePage() {
   const { player } = useStudentAuthStore()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">CourtTrack</span>
@@ -57,22 +57,19 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-blue-50/50"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-gray-50 py-20 lg:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
-                <Star className="h-4 w-4 mr-2 text-yellow-500" />
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold">
+                <Star className="h-4 w-4 mr-2 text-blue-600" />
                 Trusted by 500+ Tennis Coaches
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 The Complete Tennis
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">
-                  Team Management System
-                </span>
+                <span className="block text-blue-600">Team Management System</span>
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -83,14 +80,14 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {coach ? (
                   <Link href="/dashboard">
-                    <Button size="lg" className="text-lg px-8 py-6">
+                    <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
                       Go to Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                 ) : player ? (
                   <Link href="/student-dashboard">
-                    <Button size="lg" className="text-lg px-8 py-6">
+                    <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
                       Student Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -98,13 +95,13 @@ export default function HomePage() {
                 ) : (
                   <>
                     <Link href="/register">
-                      <Button size="lg" className="text-lg px-8 py-6">
+                      <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
                         Get Started Free
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
                     <Link href="/login">
-                      <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+                      <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
                         Login
                       </Button>
                     </Link>
@@ -114,15 +111,15 @@ export default function HomePage() {
               
               <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
                   Free to start
                 </div>
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
                   No credit card required
                 </div>
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
                   Easy setup
                 </div>
               </div>
@@ -130,21 +127,20 @@ export default function HomePage() {
             
             {/* Right Visual */}
             <div className="relative hidden lg:block">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-blue-600/20 rounded-3xl blur-3xl"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+              <div className="absolute inset-0 bg-blue-100 rounded-3xl blur-3xl opacity-50"></div>
+              <div className="relative bg-white rounded-3xl shadow-lg p-8 border border-gray-200">
                 <div className="space-y-6">
-                  {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-4">
-                    <Card className="border-none shadow-md">
+                    <Card className="border border-gray-200 shadow-md">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-3">
-                          <Users className="h-10 w-10 text-green-600" />
+                          <Users className="h-10 w-10 text-blue-600" />
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">24</div>
                         <p className="text-sm text-gray-600">Active Players</p>
                       </CardContent>
                     </Card>
-                    <Card className="border-none shadow-md">
+                    <Card className="border border-gray-200 shadow-md">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-3">
                           <Trophy className="h-10 w-10 text-blue-600" />
@@ -155,8 +151,7 @@ export default function HomePage() {
                     </Card>
                   </div>
                   
-                  {/* Progress Card */}
-                  <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-6 text-white">
+                  <div className="bg-blue-600 rounded-2xl p-6 text-white">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-lg">Team Performance</h3>
                       <BarChart3 className="h-6 w-6" />
@@ -167,8 +162,8 @@ export default function HomePage() {
                           <span>Win Rate</span>
                           <span className="font-semibold">82%</span>
                         </div>
-                        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                          <div className="bg-white h-2 rounded-full animate-progress" style={{ width: '82%' }}></div>
+                        <div className="w-full bg-white/20 rounded-full h-2">
+                          <div className="bg-white h-2 rounded-full" style={{ width: '82%' }}></div>
                         </div>
                       </div>
                       <div>
@@ -176,8 +171,8 @@ export default function HomePage() {
                           <span>Total Points</span>
                           <span className="font-semibold">1,284</span>
                         </div>
-                        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
-                          <div className="bg-white h-2 rounded-full animate-progress" style={{ width: '72%' }}></div>
+                        <div className="w-full bg-white/20 rounded-full h-2">
+                          <div className="bg-white h-2 rounded-full" style={{ width: '72%' }}></div>
                         </div>
                       </div>
                     </div>
@@ -194,7 +189,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
               <div className="text-gray-600">Active Coaches</div>
             </div>
             <div className="text-center">
@@ -202,11 +197,11 @@ export default function HomePage() {
               <div className="text-gray-600">Matches Tracked</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600 mb-2">2,500+</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">2,500+</div>
               <div className="text-gray-600">Players Managed</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-orange-600 mb-2">98%</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
               <div className="text-gray-600">Satisfaction Rate</div>
             </div>
           </div>
@@ -232,43 +227,37 @@ export default function HomePage() {
                 icon: Calendar,
                 title: 'Match Management',
                 description: 'Schedule matches, track scores, and manage team competitions with detailed statistics.',
-                color: 'green'
               },
               {
                 icon: Users,
                 title: 'Team Management',
                 description: 'Manage player rosters, track attendance, and create optimal lineups for matches.',
-                color: 'blue'
               },
               {
                 icon: BarChart3,
                 title: 'Performance Analytics',
                 description: 'Monitor player performance and generate detailed analytics reports.',
-                color: 'purple'
               },
               {
                 icon: Trophy,
                 title: 'Tournament Management',
                 description: 'Create and manage tournaments with automated bracket generation.',
-                color: 'orange'
               },
               {
                 icon: Clock,
                 title: 'Attendance Tracking',
                 description: 'Track player attendance at practices and matches with detailed reports.',
-                color: 'red'
               },
               {
                 icon: Zap,
                 title: 'Smart Lineups',
                 description: 'AI-powered lineup suggestions based on player performance and strategy.',
-                color: 'indigo'
               }
             ].map((feature, index) => (
-              <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card key={index} className="border border-gray-200 shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <div className={`p-4 bg-${feature.color}-100 rounded-2xl w-16 h-16 flex items-center justify-center mb-6`}>
-                    <feature.icon className={`h-8 w-8 text-${feature.color}-600`} />
+                  <div className="p-4 bg-blue-100 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+                    <feature.icon className="h-8 w-8 text-blue-600" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{feature.description}</p>
@@ -280,7 +269,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-green-600 to-blue-600 py-20">
+      <section className="bg-blue-600 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             Ready to Transform Your Tennis Team Management?
@@ -291,13 +280,13 @@ export default function HomePage() {
           {!coach && !player && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
-                <Button size="lg" className="text-lg px-8 py-6 bg-white text-green-600 hover:bg-gray-100">
+                <Button size="lg" className="text-lg px-8 py-6 bg-white text-blue-600 hover:bg-gray-100">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white text-white hover:bg-white hover:text-green-600">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white bg-transparent text-white hover:bg-white hover:text-blue-600 transition-all">
                   Login to Account
                 </Button>
               </Link>
@@ -310,10 +299,9 @@ export default function HomePage() {
       <footer className="bg-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-            {/* Brand */}
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Trophy className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-xl font-bold">CourtTrack</span>
@@ -323,7 +311,6 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h3 className="font-semibold mb-4 text-lg">Quick Links</h3>
               <ul className="space-y-3 text-gray-400">
@@ -342,7 +329,6 @@ export default function HomePage() {
               </ul>
             </div>
 
-            {/* Features */}
             <div>
               <h3 className="font-semibold mb-4 text-lg">Features</h3>
               <ul className="space-y-3 text-gray-400">
