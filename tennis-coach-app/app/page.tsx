@@ -21,7 +21,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#05C274] rounded-lg flex items-center justify-center">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">CourtTrack</span>
@@ -62,14 +62,14 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold">
-                <Star className="h-4 w-4 mr-2 text-blue-600" />
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#85D5F6] bg-opacity-20 text-[#094542] text-sm font-semibold">
+                <Star className="h-4 w-4 mr-2 text-[#05C274]" />
                 Trusted by 500+ Tennis Coaches
               </div>
               
               <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 The Complete Tennis
-                <span className="block text-blue-600">Team Management System</span>
+                <span className="block text-[#05C274]">Team Management System</span>
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed">
@@ -80,14 +80,14 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {coach ? (
                   <Link href="/dashboard">
-                    <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button size="lg" className="text-lg px-8 py-6 bg-[#05C274] hover:bg-[#094542] text-white">
                       Go to Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                 ) : player ? (
                   <Link href="/student-dashboard">
-                    <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button size="lg" className="text-lg px-8 py-6 bg-[#05C274] hover:bg-[#094542] text-white">
                       Student Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -95,13 +95,13 @@ export default function HomePage() {
                 ) : (
                   <>
                     <Link href="/register">
-                      <Button size="lg" className="text-lg px-8 py-6 bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button size="lg" className="text-lg px-8 py-6 bg-[#05C274] hover:bg-[#094542] text-white">
                         Get Started Free
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
                     <Link href="/login">
-                      <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-blue-600 text-blue-600 hover:bg-blue-50">
+                      <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-[#05C274] text-[#05C274] hover:bg-[#BCFB89] bg-opacity-10">
                         Login
                       </Button>
                     </Link>
@@ -111,15 +111,15 @@ export default function HomePage() {
               
               <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-[#05C274] mr-2" />
                   Free to start
                 </div>
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-[#05C274] mr-2" />
                   No credit card required
                 </div>
                 <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                  <CheckCircle className="h-5 w-5 text-[#05C274] mr-2" />
                   Easy setup
                 </div>
               </div>
@@ -127,14 +127,14 @@ export default function HomePage() {
             
             {/* Right Visual */}
             <div className="relative hidden lg:block">
-              <div className="absolute inset-0 bg-blue-100 rounded-3xl blur-3xl opacity-50"></div>
+              <div className="absolute inset-0 bg-[#85D5F6] bg-opacity-30 rounded-3xl blur-3xl"></div>
               <div className="relative bg-white rounded-3xl shadow-lg p-8 border border-gray-200">
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <Card className="border border-gray-200 shadow-md">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-3">
-                          <Users className="h-10 w-10 text-blue-600" />
+                          <Users className="h-10 w-10 text-[#05C274]" />
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">24</div>
                         <p className="text-sm text-gray-600">Active Players</p>
@@ -143,7 +143,7 @@ export default function HomePage() {
                     <Card className="border border-gray-200 shadow-md">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-3">
-                          <Trophy className="h-10 w-10 text-blue-600" />
+                          <Trophy className="h-10 w-10 text-[#05C274]" />
                         </div>
                         <div className="text-3xl font-bold text-gray-900 mb-1">12</div>
                         <p className="text-sm text-gray-600">Matches This Season</p>
@@ -151,7 +151,7 @@ export default function HomePage() {
                     </Card>
                   </div>
                   
-                  <div className="bg-blue-600 rounded-2xl p-6 text-white">
+                  <div className="bg-[#05C274] rounded-2xl p-6 text-white">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-lg">Team Performance</h3>
                       <BarChart3 className="h-6 w-6" />
@@ -189,19 +189,19 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">500+</div>
               <div className="text-gray-600">Active Coaches</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">10,000+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">10,000+</div>
               <div className="text-gray-600">Matches Tracked</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">2,500+</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">2,500+</div>
               <div className="text-gray-600">Players Managed</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
+              <div className="text-4xl font-bold text-[#05C274] mb-2">98%</div>
               <div className="text-gray-600">Satisfaction Rate</div>
             </div>
           </div>
@@ -256,8 +256,8 @@ export default function HomePage() {
             ].map((feature, index) => (
               <Card key={index} className="border border-gray-200 shadow-md hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <div className="p-4 bg-blue-100 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
-                    <feature.icon className="h-8 w-8 text-blue-600" />
+                  <div className="p-4 bg-[#85D5F6] bg-opacity-20 rounded-2xl w-16 h-16 flex items-center justify-center mb-6">
+                    <feature.icon className="h-8 w-8 text-[#05C274]" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{feature.description}</p>
@@ -269,7 +269,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-blue-600 py-20">
+      <section className="bg-[#05C274] py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-4">
             Ready to Transform Your Tennis Team Management?
@@ -280,13 +280,13 @@ export default function HomePage() {
           {!coach && !player && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
-                <Button size="lg" className="text-lg px-8 py-6 bg-white text-blue-600 hover:bg-gray-100">
+                <Button size="lg" className="text-lg px-8 py-6 bg-white text-[#05C274] hover:bg-gray-100">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/login">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white bg-transparent text-white hover:bg-white hover:text-blue-600 transition-all">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2 border-white bg-transparent text-white hover:bg-white hover:text-[#05C274] transition-all">
                   Login to Account
                 </Button>
               </Link>
@@ -301,7 +301,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#05C274] rounded-lg flex items-center justify-center">
                   <Trophy className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-xl font-bold">CourtTrack</span>
