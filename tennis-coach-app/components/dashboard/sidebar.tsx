@@ -26,8 +26,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Team', href: '/dashboard/team', icon: Users },
-  { name: 'Matches', href: '/dashboard/matches', icon: Calendar },
-  { name: 'Tournaments', href: '/dashboard/tournaments', icon: Trophy },
+  { name: 'Tournaments & Matches', href: '/dashboard/tournaments-matches', icon: Trophy },
   { name: 'Lineups', href: '/dashboard/lineups', icon: Gamepad2 },
   { name: 'Announcements', href: '/dashboard/announcements', icon: MessageSquare },
   { name: 'Attendance', href: '/dashboard/attendance', icon: ClipboardCheck },
