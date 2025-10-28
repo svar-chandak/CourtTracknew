@@ -7,9 +7,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from '@/lib/validations'
 import { useAuthStore } from '@/stores/auth-store'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { ArrowLeft, Eye, EyeOff, Circle, Mail, Lock, User, School } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -53,7 +50,7 @@ export default function LoginPage() {
         toast.success('Welcome back!')
         router.push('/dashboard')
       }
-    } catch (error) {
+    } catch {
       setErrorMessage('An unexpected error occurred')
     } finally {
       setIsLoading(false)
@@ -79,7 +76,7 @@ export default function LoginPage() {
         toast.success('Account created successfully! Please check your email to verify your account.')
         setIsSignUp(false)
       }
-    } catch (error) {
+    } catch {
       setErrorMessage('An unexpected error occurred')
     } finally {
       setIsLoading(false)
@@ -375,7 +372,7 @@ export default function LoginPage() {
                   </button>
 
                   <p className="text-center text-sm text-gray-300">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <button
                       type="button"
                       onClick={() => setIsSignUp(true)}
