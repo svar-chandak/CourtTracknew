@@ -59,7 +59,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <div className="flex min-h-screen">
         {/* Left Side - Image/Content */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-blue-600 relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#05C274] to-[#094542] relative overflow-hidden">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
             <div className="text-center max-w-md">
@@ -76,7 +76,7 @@ export default function RegisterPage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-sm text-white/80 mt-2">Join 500+ Tennis Coaches</p>
+              <p className="text-sm text-white/80 mt-2">Join 50+ Tennis Coaches</p>
             </div>
           </div>
         </div>

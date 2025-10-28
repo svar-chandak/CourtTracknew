@@ -5,31 +5,42 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { loginSchema, type LoginFormData } from '@/lib/validations'
+import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from '@/lib/validations'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { ArrowLeft, Eye, EyeOff, Home, Circle } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Circle, Mail, Lock, User, School } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function LoginPage() {
+  const [isSignUp, setIsSignUp] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
   const signIn = useAuthStore((state) => state.signIn)
+  const signUp = useAuthStore((state) => state.signUp)
 
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
+    register: registerLogin,
+    handleSubmit: handleSubmitLogin,
+    formState: { errors: loginErrors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = async (data: LoginFormData) => {
+  const {
+    register: registerRegister,
+    handleSubmit: handleSubmitRegister,
+    formState: { errors: registerErrors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  })
+
+  const onLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setErrorMessage('')
     
@@ -49,180 +60,424 @@ export default function LoginPage() {
     }
   }
 
+  const onRegisterSubmit = async (data: RegisterFormData) => {
+    setIsLoading(true)
+    setErrorMessage('')
+    
+    try {
+      const { error } = await signUp(
+        data.email,
+        data.password,
+        data.full_name,
+        data.school_name,
+        data.phone
+      )
+      
+      if (error) {
+        setErrorMessage(error)
+      } else {
+        toast.success('Account created successfully! Please check your email to verify your account.')
+        setIsSignUp(false)
+      }
+    } catch (error) {
+      setErrorMessage('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex min-h-screen">
-        {/* Left Side - Image/Content */}
-        <div className="hidden lg:flex lg:w-1/2 bg-[#05C274] relative overflow-hidden">
-          <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
-            <div className="text-center max-w-md">
-              <Circle className="h-16 w-16 mx-auto mb-6 text-white/90" />
-              <h2 className="text-4xl font-bold mb-4">CourtTrack</h2>
-              <p className="text-xl font-light mb-8">
-                "The complete tennis team management system for coaches and players. 
-                Track matches, manage lineups, and monitor player performance with ease."
-              </p>
-              <div className="flex items-center justify-center space-x-1">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-sm text-white/80 mt-2">Trusted by 50+ Tennis Coaches</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Login Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16">
-          <div className="w-full max-w-2xl">
-            {/* Back to Home Button */}
-            <div className="mb-6">
-              <Link 
-                href="/" 
-                className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Link>
-            </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
+      {/* Floating Background Elements */}
+      <motion.div
+        className="absolute top-20 left-10 w-4 h-4 bg-green-400 rounded-full opacity-20"
+        animate={{
+          y: [0, -20, 0],
+          x: [0, 10, 0],
+          scale: [1, 1.2, 1]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute top-40 right-20 w-6 h-6 bg-green-400 rounded-full opacity-20"
+        animate={{
+          y: [0, 30, 0],
+          x: [0, -15, 0],
+          scale: [1, 0.8, 1]
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1
+        }}
+      />
+      <motion.div
+        className="absolute bottom-40 left-20 w-3 h-3 bg-yellow-400 rounded-full opacity-20"
+        animate={{
+          y: [0, -25, 0],
+          x: [0, 20, 0],
+          scale: [1, 1.5, 1]
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+      />
+      <motion.div
+        className="absolute top-60 left-1/3 w-5 h-5 bg-green-300 rounded-full opacity-20"
+        animate={{
+          y: [0, 40, 0],
+          x: [0, -10, 0],
+          scale: [1, 0.7, 1]
+        }}
+        transition={{
+          duration: 7,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.5
+        }}
+      />
+      
+      <div className="relative w-full max-w-4xl h-[700px] bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white border-opacity-20">
+        {/* Sign In Form - Right Side (default) / Left Side (when signing up) */}
+        <div 
+          className={`absolute top-0 w-1/2 h-full bg-white bg-opacity-20 backdrop-blur-sm p-12 flex flex-col justify-center transition-all duration-700 ease-in-out ${
+            isSignUp ? 'left-0' : 'left-1/2'
+          }`}
+        >
+          <div className="max-w-md mx-auto w-full">
             {/* Logo */}
-            <div className="mb-8">
-              <Link href="/" className="flex items-center space-x-2">
-                <Circle className="h-8 w-8 text-green-600" />
-                <span className="text-2xl font-bold text-gray-900">CourtTrack</span>
-              </Link>
-            </div>
+            <motion.div 
+              className="flex justify-center mb-6"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                type: "spring", 
+                stiffness: 200 
+              }}
+            >
+              <Circle className="h-16 w-16 text-green-400" />
+            </motion.div>
 
-            {/* Welcome Text */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
-              <p className="text-gray-600">Welcome back, please enter your details</p>
-            </div>
-
-            {/* Error Message */}
-            {errorMessage && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
+            {isSignUp ? (
+              // Sign Up Form
+              <>
+                <motion.h2 
+                  className="text-3xl font-bold text-green-400 text-center mb-2"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                >
+                  Create Account
+                </motion.h2>
+                <motion.p 
+                  className="text-center text-gray-300 mb-4"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  Join CourtTrack today
+                </motion.p>
+                
+                {errorMessage && (
+                  <div className="mb-6 p-3 bg-red-600 bg-opacity-20 border border-red-500 rounded-lg">
+                    <p className="text-red-200 text-sm text-center">{errorMessage}</p>
                   </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800">{errorMessage}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Email Field */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  className="h-12 px-4 border-gray-300 focus:border-green-500 focus:ring-green-500"
-                  {...register('email')}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email.message}</p>
                 )}
-              </div>
-
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    className="h-12 px-4 pr-12 border-gray-300 focus:border-green-500 focus:ring-green-500"
-                    {...register('password')}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
+                
+                <motion.form 
+                  onSubmit={handleSubmitRegister(onRegisterSubmit)} 
+                  className="space-y-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                >
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      className="w-full px-4 py-3 pl-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerRegister('full_name')}
+                      disabled={isLoading}
+                    />
+                    {registerErrors.full_name && (
+                      <p className="text-sm text-red-400 mt-1">{registerErrors.full_name.message}</p>
                     )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600">{errors.password.message}</p>
-                )}
-              </div>
-
-              {/* Remember me and Forgot password */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                    Remember me
-                  </label>
-                </div>
-                <Link href="/forgot-password" className="text-sm text-[#05C274] hover:text-[#094542]">
-                  Forgot password?
-                </Link>
-              </div>
-
-              {/* Login Button */}
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 bg-[#05C274] hover:bg-[#094542] text-white font-medium"
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing in...
                   </div>
-                ) : (
-                  'Sign in'
+
+                  <div className="relative">
+                    <School className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type="text"
+                      placeholder="School Name"
+                      className="w-full px-4 py-3 pl-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerRegister('school_name')}
+                      disabled={isLoading}
+                    />
+                    {registerErrors.school_name && (
+                      <p className="text-sm text-red-400 mt-1">{registerErrors.school_name.message}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      className="w-full px-4 py-3 pl-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerRegister('email')}
+                      disabled={isLoading}
+                    />
+                    {registerErrors.email && (
+                      <p className="text-sm text-red-400 mt-1">{registerErrors.email.message}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password (min. 6 characters)"
+                      className="w-full px-4 py-3 pl-10 pr-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerRegister('password')}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5 text-gray-300" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-gray-300" />
+                      )}
+                    </button>
+                    {registerErrors.password && (
+                      <p className="text-sm text-red-400 mt-1">{registerErrors.password.message}</p>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Confirm Password"
+                      className="w-full px-4 py-3 pl-10 pr-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5 text-gray-300" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-gray-300" />
+                      )}
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-green-400 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                  </button>
+
+                  <p className="text-center text-sm text-gray-300">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(false)}
+                      className="text-green-400 font-semibold hover:underline"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </motion.form>
+              </>
+            ) : (
+              // Sign In Form
+              <>
+                <h2 className="text-3xl font-bold text-green-400 text-center mb-2">Sign In</h2>
+                <p className="text-center text-gray-300 mb-4">Welcome back to CourtTrack</p>
+                
+                {errorMessage && (
+                  <div className="mb-6 p-3 bg-red-600 bg-opacity-20 border border-red-500 rounded-lg">
+                    <p className="text-red-200 text-sm text-center">{errorMessage}</p>
+                  </div>
                 )}
-              </Button>
-            </form>
+                
+                <form onSubmit={handleSubmitLogin(onLoginSubmit)} className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type="email"
+                      placeholder="name@example.com"
+                      className="w-full px-4 py-3 pl-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerLogin('email')}
+                      disabled={isLoading}
+                    />
+                    {loginErrors.email && (
+                      <p className="text-sm text-red-400 mt-1">{loginErrors.email.message}</p>
+                    )}
+                  </div>
 
-            {/* Sign up link */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-600">
-                Not registered yet?{' '}
-                <Link href="/register" className="text-green-600 hover:text-green-700 font-medium">
-                  Create an account
-                </Link>
-              </p>
-            </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      className="w-full px-4 py-3 pl-10 pr-10 border-2 border-white border-opacity-30 rounded-xl focus:outline-none focus:border-green-400 bg-white bg-opacity-20 backdrop-blur-sm text-white placeholder-gray-300"
+                      {...registerLogin('password')}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5 text-gray-300" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-gray-300" />
+                      )}
+                    </button>
+                    {loginErrors.password && (
+                      <p className="text-sm text-red-400 mt-1">{loginErrors.password.message}</p>
+                    )}
+                  </div>
 
-            {/* Student Login Link */}
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Are you a student?{' '}
-                <Link href="/student-login" className="text-green-600 hover:text-green-700 font-medium">
-                  Student Login
-                </Link>
-              </p>
-            </div>
+                  <div className="text-right">
+                    <Link href="/forgot-password" className="text-sm text-green-400 hover:underline font-semibold">
+                      Forgot Password?
+                    </Link>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-green-400 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50"
+                  >
+                    {isLoading ? 'Signing In...' : 'Sign In'}
+                  </button>
+
+                  <p className="text-center text-sm text-gray-300">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => setIsSignUp(true)}
+                      className="text-green-400 font-semibold hover:underline"
+                    >
+                      Sign Up
+                    </button>
+                  </p>
+                </form>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Overlay Panel - Slides between left and right */}
+        <div 
+          className={`absolute top-0 w-1/2 h-full bg-gradient-to-br from-green-400 to-green-600 text-white p-12 flex flex-col justify-center items-center transition-all duration-700 ease-in-out ${
+            isSignUp ? 'left-1/2' : 'left-0'
+          }`}
+        >
+          <div className="text-center">
+            {isSignUp ? (
+              // Welcome Back Panel (shown when in sign up mode)
+              <>
+                <motion.h2 
+                  className="text-4xl font-bold mb-4"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  Welcome<br />Back!
+                </motion.h2>
+                <motion.p 
+                  className="text-green-100 mb-8"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  Already have an account?<br />Sign in to access CourtTrack
+                </motion.p>
+                <motion.button
+                  onClick={() => setIsSignUp(false)}
+                  className="px-12 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-green-600 transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign In
+                </motion.button>
+              </>
+            ) : (
+              // Hello Friend Panel (shown when in sign in mode)
+              <>
+                <motion.h2 
+                  className="text-4xl font-bold mb-4"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  Hello,<br />Coach!
+                </motion.h2>
+                <motion.p 
+                  className="text-green-100 mb-8"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  New to CourtTrack?<br />Create an account and start managing your team
+                </motion.p>
+                <motion.button
+                  onClick={() => setIsSignUp(true)}
+                  className="px-12 py-3 border-2 border-white text-white rounded-full font-bold hover:bg-white hover:text-green-600 transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Sign Up
+                </motion.button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Back to Home Button */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 text-white hover:text-green-400 z-10"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </Link>
+
+        {/* Student Login Link */}
+        <Link
+          href="/student-login"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm hover:text-green-400 z-10"
+        >
+          Student Login →
+        </Link>
       </div>
     </div>
   )
