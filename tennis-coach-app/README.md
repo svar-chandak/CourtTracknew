@@ -102,7 +102,31 @@ The app uses a comprehensive database schema with the following key tables:
 - **lineups**: Team lineups for matches
 - **challenge_matches**: Challenge match tracking
 
-See `supabase-schema.sql` for the complete schema with relationships and RLS policies.
+See `database-schema.sql` for the complete schema with relationships and RLS policies.
+
+## 🔄 Recent Refactoring Improvements
+
+The codebase has been significantly refactored to improve maintainability, performance, and developer experience:
+
+### ✅ Completed Refactoring Tasks
+
+1. **Reusable UI Components** - Created standardized components for loading states, error messages, success messages, empty states, and error boundaries
+2. **Service Layer Architecture** - Extracted database operations into dedicated service classes with proper error handling
+3. **Custom Hooks** - Created reusable hooks for team data management, player management, and match management
+4. **Enhanced Error Handling** - Implemented comprehensive error boundaries and improved error states throughout the application
+5. **Type Safety Improvements** - Added comprehensive TypeScript types and reduced `any` usage
+6. **Performance Optimization** - Implemented memoized components and query optimization with caching
+7. **Database Schema Consolidation** - Unified all database schema files into a single source of truth
+8. **Query Optimization** - Added intelligent caching and batch query capabilities
+
+### 🚀 Key Improvements
+
+- **Better Error Handling**: Centralized error management with user-friendly error boundaries
+- **Improved Performance**: Memoized components and intelligent query caching reduce unnecessary re-renders and API calls
+- **Enhanced Developer Experience**: Custom hooks and service layers make the code more maintainable and testable
+- **Type Safety**: Comprehensive TypeScript types prevent runtime errors and improve IDE support
+- **Code Reusability**: Extracted common patterns into reusable components and utilities
+- **Database Optimization**: Consolidated schema and optimized queries with caching strategies
 
 ## 🎨 Project Structure
 
@@ -119,21 +143,37 @@ src/
 │   ├── lineups/
 │   └── layout.tsx
 ├── components/
-│   ├── ui/ (shadcn components)
+│   ├── ui/ (shadcn components + custom components)
+│   │   ├── loading-spinner.tsx
+│   │   ├── error-message.tsx
+│   │   ├── success-message.tsx
+│   │   ├── empty-state.tsx
+│   │   ├── error-boundary.tsx
+│   │   └── memoized-components.tsx
 │   ├── dashboard/
 │   ├── team/
 │   ├── tournaments/
 │   ├── matches/
 │   └── layout/
 ├── lib/
+│   ├── services/
+│   │   └── database.ts (Service layer)
+│   ├── hooks/
+│   │   └── use-team-data.ts (Custom hooks)
+│   ├── optimization/
+│   │   └── query-optimizer.ts (Query optimization)
+│   ├── types/
+│   │   ├── types.ts (Core types)
+│   │   └── api.ts (API types)
+│   ├── validations/
+│   │   └── schemas.ts (Zod schemas)
 │   ├── supabase-client.ts
 │   ├── supabase-server.ts
-│   ├── types.ts
 │   ├── utils.ts
 │   └── validations.ts
 └── stores/
     ├── auth-store.ts
-    ├── team-store.ts
+    ├── team-store.ts (Refactored with service layer)
     └── tournament-store.ts
 ```
 

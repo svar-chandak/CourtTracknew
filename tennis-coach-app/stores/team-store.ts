@@ -1,12 +1,13 @@
 import { create } from 'zustand'
-import { supabase } from '@/lib/supabase'
 import type { Team, Player, Match } from '@/lib/types'
+import { PlayerService, TeamService, MatchService, DatabaseError } from '@/lib/services/database'
 
 interface TeamState {
   currentTeam: Team | null
   players: Player[]
   matches: Match[]
   loading: boolean
+  error: string | null
   
   // Team actions
   getCurrentTeam: (coachId: string) => Promise<void>
@@ -26,6 +27,9 @@ interface TeamState {
   createMatch: (match: Omit<Match, 'id' | 'created_at'>) => Promise<{ error: string | null }>
   updateMatchScore: (matchId: string, homeScore: number, awayScore: number) => Promise<{ error: string | null }>
   updateMatchStatus: (matchId: string, status: Match['status']) => Promise<{ error: string | null }>
+  
+  // Utility actions
+  clearError: () => void
 }
 
 export const useTeamStore = create<TeamState>((set, get) => ({
@@ -33,48 +37,23 @@ export const useTeamStore = create<TeamState>((set, get) => ({
   players: [],
   matches: [],
   loading: true,
+  error: null,
 
   getCurrentTeam: async (coachId: string) => {
     try {
-      set({ loading: true })
+      set({ loading: true, error: null })
       
-      const { data: teams, error } = await supabase
-        .from('teams')
-        .select(`
-          *,
-          coach:coaches(*)
-        `)
-        .eq('coach_id', coachId)
-
-      if (error) {
-        console.error('Error fetching team:', error)
-        set({ currentTeam: null, loading: false })
-        return
-      }
-
-      // Handle case where no team exists or multiple teams exist
-      const team = teams && teams.length > 0 ? teams[0] : null
+      const team = await TeamService.getTeamByCoachId(coachId)
       set({ currentTeam: team, loading: false })
     } catch (error) {
-      console.error('Error in getCurrentTeam:', error)
-      set({ currentTeam: null, loading: false })
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to fetch team'
+      set({ currentTeam: null, loading: false, error: errorMessage })
     }
   },
 
   updateTeamRecord: async (teamId: string, wins: number, losses: number) => {
     try {
-      const { error } = await supabase
-        .from('teams')
-        .update({
-          season_record_wins: wins,
-          season_record_losses: losses,
-        })
-        .eq('id', teamId)
-
-      if (error) {
-        console.error('Error updating team record:', error)
-        return
-      }
+      await TeamService.updateTeamRecord(teamId, wins, losses)
 
       // Update local state
       const { currentTeam } = get()
@@ -88,219 +67,132 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         })
       }
     } catch (error) {
-      console.error('Error in updateTeamRecord:', error)
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to update team record'
+      set({ error: errorMessage })
     }
   },
 
   searchTeamsByCode: async (teamCode: string) => {
     try {
-      const { data: teams, error } = await supabase
-        .from('teams')
-        .select(`
-          *,
-          coach:coaches(*)
-        `)
-        .ilike('team_code', `%${teamCode}%`)
-
-      if (error) {
-        console.error('Error searching teams:', error)
-        return { teams: [], error: error.message }
-      }
-
-      return { teams: teams || [], error: null }
+      const teams = await TeamService.searchTeamsByCode(teamCode)
+      return { teams, error: null }
     } catch (error) {
-      console.error('Error searching teams:', error)
-      return { teams: [], error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to search teams'
+      return { teams: [], error: errorMessage }
     }
   },
 
   getAllTeams: async () => {
     try {
-      const { data: teams, error } = await supabase
-        .from('teams')
-        .select(`
-          *,
-          coach:coaches(*)
-        `)
-        .order('school_name')
-
-      if (error) {
-        console.error('Error fetching all teams:', error)
-        return { teams: [], error: error.message }
-      }
-
-      return { teams: teams || [], error: null }
+      const teams = await TeamService.getAllTeams()
+      return { teams, error: null }
     } catch (error) {
-      console.error('Error fetching all teams:', error)
-      return { teams: [], error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to fetch teams'
+      return { teams: [], error: errorMessage }
     }
   },
 
   getPlayers: async (teamId: string) => {
     try {
-      set({ loading: true })
+      set({ loading: true, error: null })
       
-      // Query with all available fields
-      const { data: players, error } = await supabase
-        .from('players')
-        .select('id, name, team_id, created_at, gender, team_level, player_id, password_hash, grade, position_preference, utr_rating')
-        .eq('team_id', teamId)
-
-      if (error) {
-        console.error('Error fetching players:', error)
-        set({ players: [], loading: false })
-        return
-      }
-
-      set({ players: players || [], loading: false })
+      const players = await PlayerService.getPlayersByTeam(teamId)
+      set({ players, loading: false })
     } catch (error) {
-      console.error('Error in getPlayers:', error)
-      set({ players: [], loading: false })
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to fetch players'
+      set({ players: [], loading: false, error: errorMessage })
     }
   },
 
   addPlayer: async (player: Omit<Player, 'id' | 'created_at'>) => {
     try {
-      // Only insert columns that exist in the database
-      const { team_id, name, gender, grade, position_preference, team_level, utr_rating, player_id, password_hash } = player
-
-      const toInsert: {
-        team_id: string
-        name: string
-        gender?: 'male' | 'female'
-        grade?: number
-        position_preference?: string
-        team_level?: 'varsity' | 'jv' | 'freshman'
-        utr_rating?: number
-        player_id?: string
-        password_hash?: string
-      } = {
-        team_id,
-        name,
-        gender,
-        grade,
-        position_preference,
-        team_level,
-        utr_rating,
-        player_id,
-        password_hash,
-      }
-
-      const { error } = await supabase
-        .from('players')
-        .insert(toInsert)
-
-      if (error) {
-        console.error('Database error:', error)
-        return { error: error.message }
-      }
-
+      await PlayerService.createPlayer(player)
       // Refresh players list
-      await get().getPlayers(team_id)
+      await get().getPlayers(player.team_id)
       return { error: null }
     } catch (error) {
-      console.error('Unexpected error:', error)
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to create player'
+      return { error: errorMessage }
     }
   },
 
   updatePlayer: async (playerId: string, updates: Partial<Player>) => {
     try {
-      const { error } = await supabase
-        .from('players')
-        .update(updates)
-        .eq('id', playerId)
-
-      if (error) return { error: error.message }
-
+      const updatedPlayer = await PlayerService.updatePlayer(playerId, updates)
+      
       // Update local state
       const { players } = get()
       const updatedPlayers = players.map(player =>
-        player.id === playerId ? { ...player, ...updates } : player
+        player.id === playerId ? updatedPlayer : player
       )
       set({ players: updatedPlayers })
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to update player'
+      return { error: errorMessage }
     }
   },
 
   deletePlayer: async (playerId: string) => {
     try {
-      const { error } = await supabase
-        .from('players')
-        .delete()
-        .eq('id', playerId)
-
-      if (error) return { error: error.message }
-
+      await PlayerService.deletePlayer(playerId)
+      
       // Update local state
       const { players } = get()
       const filteredPlayers = players.filter(player => player.id !== playerId)
       set({ players: filteredPlayers })
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to delete player'
+      return { error: errorMessage }
+    }
+  },
+
+  bulkUpdatePlayers: async (updates: Array<{ id: string; team_level?: string; gender?: string }>) => {
+    try {
+      await PlayerService.bulkUpdatePlayers(updates)
+      
+      // Refresh players list
+      const { currentTeam } = get()
+      if (currentTeam) {
+        await get().getPlayers(currentTeam.id)
+      }
+      
+      return { error: null }
+    } catch (error) {
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to update players'
+      return { error: errorMessage }
     }
   },
 
   getMatches: async (teamId: string) => {
     try {
-      set({ loading: true })
+      set({ loading: true, error: null })
       
-      const { data: matches, error } = await supabase
-        .from('matches')
-        .select(`
-          *,
-          home_team:teams!matches_home_team_id_fkey(*),
-          away_team:teams!matches_away_team_id_fkey(*),
-          created_by_coach:coaches!matches_created_by_fkey(*)
-        `)
-        .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
-        .order('match_date', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching matches:', error)
-        set({ matches: [], loading: false })
-        return
-      }
-
-      set({ matches: matches || [], loading: false })
+      const matches = await MatchService.getMatchesByTeam(teamId)
+      set({ matches, loading: false })
     } catch (error) {
-      console.error('Error in getMatches:', error)
-      set({ matches: [], loading: false })
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to fetch matches'
+      set({ matches: [], loading: false, error: errorMessage })
     }
   },
 
   createMatch: async (match: Omit<Match, 'id' | 'created_at'>) => {
     try {
-      const { error } = await supabase
-        .from('matches')
-        .insert(match)
-
-      if (error) return { error: error.message }
-
+      await MatchService.createMatch(match)
       // Refresh matches list
       await get().getMatches(match.home_team_id)
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to create match'
+      return { error: errorMessage }
     }
   },
 
   updateMatchScore: async (matchId: string, homeScore: number, awayScore: number) => {
     try {
-      const { error } = await supabase
-        .from('matches')
-        .update({
-          home_score: homeScore,
-          away_score: awayScore,
-          status: 'completed',
-        })
-        .eq('id', matchId)
-
-      if (error) return { error: error.message }
-
+      await MatchService.updateMatchScore(matchId, homeScore, awayScore)
+      
       // Update local state
       const { matches } = get()
       const updatedMatches = matches.map(match =>
@@ -311,19 +203,15 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       set({ matches: updatedMatches })
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to update match score'
+      return { error: errorMessage }
     }
   },
 
   updateMatchStatus: async (matchId: string, status: Match['status']) => {
     try {
-      const { error } = await supabase
-        .from('matches')
-        .update({ status })
-        .eq('id', matchId)
-
-      if (error) return { error: error.message }
-
+      await MatchService.updateMatchStatus(matchId, status)
+      
       // Update local state
       const { matches } = get()
       const updatedMatches = matches.map(match =>
@@ -332,43 +220,12 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       set({ matches: updatedMatches })
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      const errorMessage = error instanceof DatabaseError ? error.message : 'Failed to update match status'
+      return { error: errorMessage }
     }
   },
 
-  bulkUpdatePlayers: async (updates: Array<{ id: string; team_level?: string; gender?: string }>) => {
-    try {
-      console.log('bulkUpdatePlayers called with:', updates)
-      
-      const promises = updates.map(update => {
-        const { id, ...updateData } = update
-        console.log(`Updating player ${id} with:`, updateData)
-        return supabase
-          .from('players')
-          .update(updateData)
-          .eq('id', id)
-      })
-
-      const results = await Promise.all(promises)
-      console.log('Database update results:', results)
-      
-      // Check for errors
-      const errors = results.filter(result => result.error)
-      if (errors.length > 0) {
-        console.error('Some updates failed:', errors)
-        return { error: 'Some players failed to update' }
-      }
-
-      // Refresh players list
-      const { currentTeam } = get()
-      if (currentTeam) {
-        get().getPlayers(currentTeam.id)
-      }
-
-      return { error: null }
-    } catch (error) {
-      console.error('Error in bulkUpdatePlayers:', error)
-      return { error: 'An unexpected error occurred' }
-    }
+  clearError: () => {
+    set({ error: null })
   },
 }))
