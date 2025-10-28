@@ -46,6 +46,13 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
     try {
       set({ loading: true })
       
+      // Get current coach ID from auth
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        set({ tournaments: [], loading: false })
+        return
+      }
+
       const { data: tournaments, error } = await supabase
         .from('tournaments')
         .select(`
@@ -56,6 +63,7 @@ export const useTournamentStore = create<TournamentState>((set, get) => ({
             team:teams(*)
           )
         `)
+        .eq('creator_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
