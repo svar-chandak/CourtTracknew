@@ -71,6 +71,7 @@ export interface TeamMatchSummary {
 }
 
 export interface CreateTeamMatchData {
+  home_team_id: string
   tournament_id?: string
   away_team_id: string
   team_level: 'varsity' | 'jv' | 'freshman'

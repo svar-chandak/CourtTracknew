@@ -79,6 +79,7 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
       }
 
       const matchData: CreateTeamMatchData = {
+        home_team_id: currentTeam.id,
         away_team_id: team.id,
         team_level: data.team_level,
         match_date: data.match_date,

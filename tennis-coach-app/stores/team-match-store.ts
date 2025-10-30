@@ -116,10 +116,9 @@ export const useTeamMatchStore = create<TeamMatchState>((set, get) => ({
       // Create individual position matches
       await get().createIndividualMatches(result.id)
 
-      // Refresh team matches
-      const { teamMatches } = get()
-      if (teamMatches.length > 0) {
-        await get().getTeamMatches(teamMatches[0].home_team_id)
+      // Refresh team matches for the home team (current team)
+      if (data.home_team_id) {
+        await get().getTeamMatches(data.home_team_id)
       }
 
       return { error: null }
