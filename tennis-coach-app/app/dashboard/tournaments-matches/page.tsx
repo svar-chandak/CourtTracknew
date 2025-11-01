@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { CreateTournamentDialog } from '@/components/tournaments/create-tournament-dialog'
-import { JoinTournamentDialog } from '@/components/tournaments/join-tournament-dialog'
-import { TournamentBracket } from '@/components/tournaments/tournament-bracket'
+import { JoinTournamentPlayerDialog } from '@/components/tournaments/join-tournament-player-dialog'
+import { SimpleTournamentManager } from '@/components/tournaments/simple-tournament-manager'
 import { CreateTeamMatchDialog } from '@/components/matches/create-team-match-dialog'
 import { TeamMatchDetailsDialog } from '@/components/matches/team-match-details-dialog'
 import { 
@@ -25,7 +26,7 @@ import type { TeamMatch, TeamMatchSummary } from '@/lib/team-match-types'
 export default function TournamentsAndMatchesPage() {
   const { coach } = useAuthStore()
   const { currentTeam, getCurrentTeam } = useTeamStore()
-  const { tournaments, loading: tournamentsLoading, getTournaments } = useTournamentStore()
+  const { tournaments, loading: tournamentsLoading, getTournaments, getTournament } = useTournamentStore()
   const { 
     teamMatches, 
     loading: matchesLoading, 
@@ -136,7 +137,9 @@ export default function TournamentsAndMatchesPage() {
     setShowMatchDetailsDialog(true)
   }
 
-  const handleViewTournament = (tournament: Tournament) => {
+  const handleViewTournament = async (tournament: Tournament) => {
+    // Load tournament into store so SimpleTournamentManager can access it
+    await getTournament(tournament.tournament_code)
     setSelectedTournament(tournament)
   }
 
@@ -566,18 +569,28 @@ export default function TournamentsAndMatchesPage() {
         onOpenChange={setShowCreateTournamentDialog}
       />
 
-      <JoinTournamentDialog
+      <JoinTournamentPlayerDialog
         open={showJoinTournamentDialog}
         onOpenChange={setShowJoinTournamentDialog}
-        tournament={selectedTournament}
+        onJoined={(tournament) => {
+          setShowJoinTournamentDialog(false)
+          setSelectedTournament(tournament)
+          getTournaments() // Refresh tournaments list
+        }}
       />
 
       {selectedTournament && (
-        <TournamentBracket
-          tournament={selectedTournament}
-          open={!!selectedTournament}
-          onOpenChange={(open) => !open && setSelectedTournament(null)}
-        />
+        <Dialog open={!!selectedTournament} onOpenChange={(open) => !open && setSelectedTournament(null)}>
+          <DialogContent className="sm:max-w-6xl max-h-[95vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{selectedTournament.name}</DialogTitle>
+            </DialogHeader>
+            <SimpleTournamentManager
+              tournamentId={selectedTournament.id}
+              tournamentCode={selectedTournament.tournament_code}
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       <CreateTeamMatchDialog
@@ -607,6 +620,3 @@ export default function TournamentsAndMatchesPage() {
     </div>
   )
 }
-
-
-
