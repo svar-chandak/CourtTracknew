@@ -1,5 +1,5 @@
-import { supabase } from './supabase'
-import type { DatabaseError } from './types/api'
+import { supabase } from '@/lib/supabase'
+import type { DatabaseError } from '@/lib/types/api'
 
 // Query optimization utilities
 export class QueryOptimizer {
