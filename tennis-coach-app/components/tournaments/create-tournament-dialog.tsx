@@ -47,8 +47,6 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
     resolver: zodResolver(tournamentSchema),
   })
 
-  const tournamentType = watch('tournament_type')
-
   const onSubmit = async (data: TournamentFormData) => {
     if (!coach) {
       toast.error('Please log in to create a tournament')
@@ -61,7 +59,7 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
       const { error } = await createTournament({
         name: data.name,
         creator_id: coach.id,
-        tournament_type: data.tournament_type,
+        tournament_type: 'single_elimination', // Default for player-based tournaments
         max_teams: data.max_teams,
         start_date: data.start_date || undefined,
         location: data.location || undefined,
@@ -89,7 +87,7 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
         <DialogHeader>
           <DialogTitle>Create New Tournament</DialogTitle>
           <DialogDescription>
-            Set up a new tournament for teams to join and compete.
+            Set up a new player-based tournament. Coaches will join with a code and submit players.
           </DialogDescription>
         </DialogHeader>
         
@@ -107,44 +105,20 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tournament_type">Tournament Type *</Label>
-            <Select
-              value={tournamentType || ''}
-                onValueChange={(value) => setValue('tournament_type', value as 'single_elimination' | 'double_elimination' | 'round_robin' | 'swiss' | 'dual_match')}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select tournament type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single_elimination">Single Elimination</SelectItem>
-                <SelectItem value="double_elimination">Double Elimination</SelectItem>
-                <SelectItem value="round_robin">Round Robin</SelectItem>
-                <SelectItem value="swiss">Swiss System</SelectItem>
-                <SelectItem value="dual_match">Dual Match</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.tournament_type && (
-              <p className="text-sm text-red-600">{errors.tournament_type.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="max_teams">Maximum Teams *</Label>
+            <Label htmlFor="max_teams">Maximum Players *</Label>
             <Select
               value={watch('max_teams')?.toString() || ''}
               onValueChange={(value) => setValue('max_teams', parseInt(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select max teams" />
+                <SelectValue placeholder="Select max players" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="4">4 teams</SelectItem>
-                <SelectItem value="6">6 teams</SelectItem>
-                <SelectItem value="8">8 teams</SelectItem>
-                <SelectItem value="10">10 teams</SelectItem>
-                <SelectItem value="12">12 teams</SelectItem>
-                <SelectItem value="16">16 teams</SelectItem>
-                <SelectItem value="32">32 teams</SelectItem>
+                <SelectItem value="4">4 players</SelectItem>
+                <SelectItem value="8">8 players</SelectItem>
+                <SelectItem value="16">16 players</SelectItem>
+                <SelectItem value="32">32 players</SelectItem>
+                <SelectItem value="64">64 players</SelectItem>
               </SelectContent>
             </Select>
             {errors.max_teams && (
@@ -187,15 +161,6 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
             {errors.description && (
               <p className="text-sm text-red-600">{errors.description.message}</p>
             )}
-          </div>
-
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Tournament Types:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li><strong>Single Elimination:</strong> Teams are eliminated after one loss</li>
-              <li><strong>Round Robin:</strong> Every team plays every other team once</li>
-              <li><strong>Dual Match:</strong> Traditional team vs team format</li>
-            </ul>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
