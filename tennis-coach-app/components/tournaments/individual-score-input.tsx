@@ -160,8 +160,8 @@ export function IndividualScoreInput({
     }
   }
 
-  const getPlayerName = (player: any) => {
-    return player ? `${player.name} (${player.team?.school_name})` : 'TBD'
+  const getPlayerName = (player: { name: string; team?: { school_name: string } } | null | undefined) => {
+    return player ? `${player.name} (${player.team?.school_name || ''})` : 'TBD'
   }
 
   return (

@@ -28,7 +28,7 @@ export function SimpleTournamentManager({ tournamentId, tournamentCode }: Simple
     getBracket
   } = usePlayerTournamentStore()
 
-  const [tournament, setTournament] = useState<any>(null)
+  const [tournament, setTournament] = useState<{ id: string; name: string; tournament_code: string; [key: string]: unknown } | null>(null)
 
   // Fetch tournament details on mount
   useEffect(() => {

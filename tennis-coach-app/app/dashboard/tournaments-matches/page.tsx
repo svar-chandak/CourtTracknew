@@ -184,7 +184,7 @@ export default function TournamentsAndMatchesPage() {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'tournaments' | 'matches')}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="tournaments">Tournaments</TabsTrigger>
           <TabsTrigger value="matches">Team Matches</TabsTrigger>
@@ -402,7 +402,7 @@ export default function TournamentsAndMatchesPage() {
           )}
 
           {/* Team Level Tabs */}
-          <Tabs value={activeTeamLevel} onValueChange={(value) => setActiveTeamLevel(value as any)}>
+          <Tabs value={activeTeamLevel} onValueChange={(value) => setActiveTeamLevel(value as 'varsity' | 'jv' | 'freshman')}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="varsity">Varsity</TabsTrigger>
               <TabsTrigger value="jv">JV</TabsTrigger>

@@ -58,7 +58,7 @@ export default function SettingsPage() {
       } else {
         toast.success('Profile updated successfully!')
       }
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Gamepad2, Plus, Users, Trophy } from 'lucide-react'
 import { CreateLineupDialog } from '@/components/lineups/create-lineup-dialog'
-import type { Player } from '@/lib/types'
+import type { Player, Lineup } from '@/lib/types'
 
 export default function LineupsPage() {
   const { coach } = useAuthStore()
@@ -66,7 +66,7 @@ export default function LineupsPage() {
     
     
     // Sort lineups by creation date (most recent first) and group by position
-    const lineupsByPosition = new Map<string, any>()
+    const lineupsByPosition = new Map<string, { lineup: Lineup; players: Player[] }>()
     
     lineups.forEach(lineup => {
       const { position, player_ids } = lineup

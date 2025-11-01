@@ -161,7 +161,7 @@ export function IndividualPositionScoreInput({
     }
   }
 
-  const getPlayerName = (player: any) => {
+  const getPlayerName = (player: { name: string } | null | undefined) => {
     return player ? player.name : 'TBD'
   }
 

@@ -2,8 +2,8 @@
 
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
-import { useNotifications } from '@/lib/notifications'
-import type { Announcement, AnnouncementType } from '@/lib/types'
+import { NotificationService } from '@/lib/notifications'
+import type { Announcement } from '@/lib/types'
 
 interface AnnouncementState {
   announcements: Announcement[]
@@ -62,9 +62,9 @@ export const useAnnouncementStore = create<AnnouncementState>((set, get) => ({
 
       // Send push notification to team members
       try {
-        const { sendNotification } = useNotifications()
+        const notificationService = NotificationService.getInstance()
         const title = announcement.is_urgent ? `🚨 URGENT: ${announcement.title}` : announcement.title
-        await sendNotification(title, {
+        await notificationService.sendNotification(title, {
           body: announcement.message,
           tag: `announcement-${announcement.team_id}`,
           requireInteraction: announcement.is_urgent,

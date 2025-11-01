@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -40,7 +40,7 @@ interface CreateTeamMatchDialogProps {
 
 export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: CreateTeamMatchDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [foundTeam, setFoundTeam] = useState<any>(null)
+  const [foundTeam, setFoundTeam] = useState<{ id: string; school_name: string; team_code: string } | null>(null)
   const { createTeamMatch, findTeamByCode } = useTeamMatchStore()
   const { currentTeam } = useTeamStore()
 
@@ -99,7 +99,7 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
       reset()
       setFoundTeam(null)
       onMatchCreated()
-    } catch (error) {
+    } catch {
       toast.error('An unexpected error occurred')
     } finally {
       setIsLoading(false)
@@ -132,7 +132,7 @@ export function CreateTeamMatchDialog({ open, onOpenChange, onMatchCreated }: Cr
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="team_level">Team Level</Label>
-            <Select value={teamLevel} onValueChange={(value) => setValue('team_level', value as any)}>
+            <Select value={teamLevel} onValueChange={(value) => setValue('team_level', value as 'varsity' | 'jv' | 'freshman')}>
               <SelectTrigger>
                 <SelectValue placeholder="Select team level" />
               </SelectTrigger>

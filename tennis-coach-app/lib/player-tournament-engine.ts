@@ -265,7 +265,7 @@ export class PlayerTournamentEngine {
     const schoolGroups = this.groupPlayersBySchool(players)
 
     // Step 2: Build two pools
-    let { poolA, poolB, poolASchools, poolBSchools } = this.buildTwoPools(schoolGroups)
+    const { poolA, poolB, poolASchools, poolBSchools } = this.buildTwoPools(schoolGroups)
 
     // Step 3: Resolve conflicts
     if (avoidSameSchool) {

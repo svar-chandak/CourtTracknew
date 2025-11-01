@@ -47,9 +47,9 @@ export default function StudentLoginPage() {
         toast.success('Welcome back!')
         router.push('/student-dashboard')
       }
-    } catch (error) {
-      toast.error('An unexpected error occurred')
-    } finally {
+      } catch {
+        toast.error('An unexpected error occurred')
+      } finally {
       setIsLoading(false)
     }
   }

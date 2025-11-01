@@ -10,7 +10,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { ArrowLeft, Eye, EyeOff, Circle } from 'lucide-react'
 
@@ -48,9 +47,9 @@ export default function RegisterPage() {
         toast.success('Account created successfully! Please check your email to verify your account.')
         router.push('/login')
       }
-    } catch (error) {
-      setErrorMessage('An unexpected error occurred')
-    } finally {
+      } catch {
+        setErrorMessage('An unexpected error occurred')
+      } finally {
       setIsLoading(false)
     }
   }
@@ -66,8 +65,8 @@ export default function RegisterPage() {
               <Circle className="h-16 w-16 mx-auto mb-6 text-white/90" />
               <h2 className="text-4xl font-bold mb-4">Join CourtTrack</h2>
               <p className="text-xl font-light mb-8">
-                "Join thousands of tennis coaches who trust CourtTrack to manage their teams, 
-                track matches, and coordinate tournaments with ease."
+                &ldquo;Join thousands of tennis coaches who trust CourtTrack to manage their teams, 
+                track matches, and coordinate tournaments with ease.&rdquo;
               </p>
               <div className="flex items-center justify-center space-x-1">
                 {[...Array(5)].map((_, i) => (

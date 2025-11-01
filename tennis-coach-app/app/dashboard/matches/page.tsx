@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTeamStore } from '@/stores/team-store'
 import { useTeamMatchStore } from '@/stores/team-match-store'
@@ -16,7 +16,6 @@ import {
   Trophy, 
   Clock, 
   Target, 
-  Users,
   School,
   Award
 } from 'lucide-react'
@@ -27,10 +26,8 @@ export default function MatchesPage() {
   const { currentTeam, getCurrentTeam } = useTeamStore()
   const { 
     teamMatches, 
-    loading, 
     getTeamMatches, 
-    getTeamMatchSummary,
-    deleteTeamMatch 
+    getTeamMatchSummary
   } = useTeamMatchStore()
   
   const [showCreateMatchDialog, setShowCreateMatchDialog] = useState(false)
@@ -45,19 +42,19 @@ export default function MatchesPage() {
     }
   }, [coach, getCurrentTeam])
 
+  const loadSummary = useCallback(async () => {
+    if (currentTeam) {
+      const summaryData = await getTeamMatchSummary(currentTeam.id)
+      setSummary(summaryData)
+    }
+  }, [currentTeam, getTeamMatchSummary])
+
   useEffect(() => {
     if (currentTeam) {
       getTeamMatches(currentTeam.id)
       loadSummary()
     }
-  }, [currentTeam, getTeamMatches])
-
-  const loadSummary = async () => {
-    if (currentTeam) {
-      const summaryData = await getTeamMatchSummary(currentTeam.id)
-      setSummary(summaryData)
-    }
-  }
+  }, [currentTeam, getTeamMatches, loadSummary])
 
   const handleCreateMatch = () => {
     setShowCreateMatchDialog(true)
@@ -68,12 +65,6 @@ export default function MatchesPage() {
     setShowMatchDetailsDialog(true)
   }
 
-  const handleDeleteMatch = async (matchId: string) => {
-    const { error } = await deleteTeamMatch(matchId)
-    if (!error) {
-      loadSummary() // Refresh summary
-    }
-  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -105,17 +96,6 @@ export default function MatchesPage() {
     return teamMatches.filter(match => match.team_level === teamLevel)
   }
 
-  const getUpcomingMatches = () => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return teamMatches.filter(match => 
-      new Date(match.match_date) >= today && match.status === 'scheduled'
-    )
-  }
-
-  const getCompletedMatches = () => {
-    return teamMatches.filter(match => match.status === 'completed')
-  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -149,7 +129,7 @@ export default function MatchesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Matches</h1>
-          <p className="text-gray-600">Schedule and manage your team's matches</p>
+          <p className="text-gray-600">Schedule and manage your team&apos;s matches</p>
         </div>
         <Button onClick={handleCreateMatch} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
@@ -211,7 +191,7 @@ export default function MatchesPage() {
       )}
 
       {/* Team Level Tabs */}
-      <Tabs value={activeTeamLevel} onValueChange={(value) => setActiveTeamLevel(value as any)}>
+      <Tabs value={activeTeamLevel} onValueChange={(value) => setActiveTeamLevel(value as 'varsity' | 'jv' | 'freshman')}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="varsity">Varsity</TabsTrigger>
           <TabsTrigger value="jv">JV</TabsTrigger>
