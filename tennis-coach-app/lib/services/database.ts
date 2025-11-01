@@ -1,5 +1,5 @@
-import { supabase } from './supabase'
-import type { Player, Team, Match, Coach } from './types'
+import { supabase } from '@/lib/supabase'
+import type { Player, Team, Match, Coach } from '@/lib/types'
 
 export class DatabaseError extends Error {
   constructor(message: string, public code?: string) {
