@@ -162,11 +162,11 @@ export class OptimizedSupabaseQuery {
           this.cacheKey,
           () => this.query,
           this.ttl
-        )
+        ) as { data: T | null; error: { message: string } | null }
         return { data: result.data, error: result.error ? { message: result.error.message } : null }
       }
 
-      const result = await this.query
+      const result = await this.query as { data: T | null; error: { message: string } | null }
       return { data: result.data, error: result.error ? { message: result.error.message } : null }
     } catch (error) {
       return {
