@@ -123,7 +123,7 @@ export function JoinTournamentPlayerDialog({
       const { supabase } = await import('@/lib/supabase')
       const { data: tournamentData, error: tournamentError } = await supabase
         .from('tournaments')
-        .select('id, name')
+        .select('*')
         .eq('tournament_code', tournamentCode.toUpperCase())
         .single()
 
@@ -149,7 +149,9 @@ export function JoinTournamentPlayerDialog({
       setSelectedPlayers(new Set())
       setStep('code')
       onOpenChange(false)
-      onJoined(tournamentData)
+      
+      // Pass full tournament object to onJoined
+      onJoined(tournamentData as Tournament)
     } catch (error) {
       toast.error('Failed to submit players')
     } finally {
